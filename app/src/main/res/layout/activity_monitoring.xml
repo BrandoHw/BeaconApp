@@ -1,0 +1,224 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+
+    android:id="@+id/scroller"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:fillViewport="true" >
+
+<RelativeLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    tools:context=".MonitoringActivity" >
+
+    <Button
+        android:id="@+id/buttonSet"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/editTextLocation"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="false"
+        android:layout_marginStart="114dp"
+        android:layout_marginLeft="9dp"
+        android:layout_marginTop="140dp"
+        android:onClick="onAddScheduleClicked"
+        android:text="Set Schedule" />
+
+    <EditText
+        android:id="@+id/editTextEvening"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/editTextInstance"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="85dp"
+        android:layout_marginTop="154dp"
+        android:layout_marginEnd="104dp"
+        android:layout_toEndOf="@+id/textViewLocation"
+        android:ems="10"
+        android:inputType="time"
+        android:text="18:00"
+        android:textSize="14sp" />
+
+    <EditText
+        android:id="@+id/editTextMorning"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/editTextInstance"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="-76dp"
+        android:layout_marginTop="154dp"
+        android:layout_marginEnd="265dp"
+        android:layout_toEndOf="@+id/textViewLocation"
+        android:ems="10"
+        android:inputType="time"
+        android:text="09:00"
+        android:textSize="14sp" />
+
+    <Button
+        android:id="@+id/buttonAdd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/editTextLocation"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="false"
+        android:layout_marginStart="13dp"
+        android:layout_marginLeft="9dp"
+        android:layout_marginTop="19dp"
+        android:onClick="onAddClicked"
+        android:text="Add Beacon" />
+
+    <Button
+        android:id="@+id/buttonRemove"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/editTextLocation"
+        android:layout_marginStart="37dp"
+        android:layout_marginLeft="2dp"
+        android:layout_marginTop="19dp"
+        android:layout_toEndOf="@+id/buttonAdd"
+        android:layout_toRightOf="@id/Button01"
+        android:onClick="onRemoveClicked"
+        android:text="Remove Beacon" />
+
+    <EditText
+        android:id="@+id/editTextLocation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/editTextInstance"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="23dp"
+        android:layout_marginEnd="61dp"
+        android:layout_toEndOf="@+id/textViewLocation"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:text="Cubicle" />
+
+    <TextView
+        android:id="@+id/textViewLocation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textViewInstance"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="17dp"
+        android:layout_marginTop="40dp"
+        android:text="Location:"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="17dp"
+        android:text="Monitoring Events:" />
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/SCROLLER_ID"
+        android:layout_width="match_parent"
+        android:layout_height="165dp"
+        android:layout_below="@+id/textView1"
+        android:layout_marginTop="0dp"
+        android:clipToPadding="true"
+        android:fillViewport="true"
+        android:fitsSystemWindows="true"
+        android:scrollbars="vertical">
+
+        <EditText
+            android:id="@+id/monitoringText"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_below="@+id/textView1"
+            android:layout_alignParentLeft="true"
+            android:layout_marginTop="36dp"
+            android:ems="10"
+            android:gravity="left|top"
+            android:inputType="textMultiLine">
+            android:layout_gravity="bottom"
+
+            <requestFocus />
+        </EditText>
+    </androidx.core.widget.NestedScrollView>
+
+    <Button
+        android:id="@+id/Button01"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/SCROLLER_ID"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginStart="21dp"
+        android:layout_marginLeft="21dp"
+        android:layout_marginTop="27dp"
+        android:onClick="onRangingClicked"
+        android:text="Start Ranging" />
+
+    <Button
+        android:id="@+id/enableButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/SCROLLER_ID"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="27dp"
+        android:layout_toRightOf="@id/Button01"
+        android:onClick="onEnableClicked"
+        android:text="Disable monitoring" />
+
+    <EditText
+        android:id="@+id/editTextName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/enableButton"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="58dp"
+        android:layout_marginEnd="62dp"
+        android:layout_toEndOf="@+id/textViewName"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:text="00112233445566778898" />
+
+    <EditText
+        android:id="@+id/editTextInstance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/editTextName"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="27dp"
+        android:layout_marginEnd="62dp"
+        android:layout_toEndOf="@+id/textViewInstance"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:text="0xabcde0900009" />
+
+    <TextView
+        android:id="@+id/textViewName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/Button01"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="17dp"
+        android:layout_marginTop="66dp"
+        android:text="Namespace:"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/textViewInstance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textViewName"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="17dp"
+        android:layout_marginTop="40dp"
+        android:text="Instance:"
+        android:textSize="18sp" />
+
+
+</RelativeLayout>
+
+</ScrollView>
