@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        app:key="alarm"
+        app:title="Alarm settings">
+
+        <SwitchPreferenceCompat
+            app:key="alarmEnable"
+            app:title="Enable Alarm"/>
+
+        <Preference
+            app:key="morning"
+            app:title="9:00 AM"
+            app:summary="Start of work shift"/>
+
+        <Preference
+            app:key="evening"
+            app:title="6:00 PM"
+            app:summary="End of work shift"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:key="help_category"
+        app:title="Help">
+
+    <Preference
+        app:key="feedback"
+        app:title="Send feedback"
+        app:summary="Report technical issues or suggest new features"/>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

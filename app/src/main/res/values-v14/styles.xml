@@ -1,12 +1,106 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
-    <!--
-        Base application theme for API 14+. This theme completely replaces
-        AppBaseTheme from BOTH res/values/styles.xml and
-        res/values-v11/styles.xml on API 14+ devices.
-    -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- API 14 theme customizations can go here. -->
+    <!-- Base application theme. -->
+    <style name="WorkTrack" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:textColorPrimary">@color/textColorPrimary</item>
+        <item name="colorSurface">@color/white</item>
+    </style>
+
+    <style name="Widget.WorkTrack.Toolbar" parent="Widget.AppCompat.Toolbar">
+        <item name="android:background">?attr/colorAccent</item>
+        <item name="android:theme">@style/WorkTrack</item>
+        <item name="popupTheme">@style/ThemeOverlay.AppCompat.Light</item>
+        <item name="android:textColorPrimary">@color/white</item>
+    </style>
+
+    <style name="Widget.WorkTrack.TextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="hintTextAppearance">@style/TextAppearance.WorkTrack.TextInputLayout.HintText</item>
+        <item name="hintTextColor">@color/textColorPrimary</item>
+        <item name="android:paddingBottom">8dp</item>
+        <item name="boxStrokeColor">@color/textInputOutlineColor</item>
+    </style>
+
+    <style name="TextAppearance.WorkTrack.TextInputLayout.HintText" parent="TextAppearance.MaterialComponents.Subtitle2">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+    </style>
+    <style name="Widget.WorkTrack.Button" parent="Widget.MaterialComponents.Button">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="backgroundTint">?attr/colorPrimaryDark</item>
+    </style>
+
+    <style name="Widget.WorkTrack.Button.TextButton" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+    </style>
+
+
+    <style name="TextAppearance.MyApp.ProfileHeader" parent="TextAppearance.MaterialComponents.Headline1">
+        <item name="android:textStyle">normal</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:letterSpacing">0</item>
+    </style>
+
+    <style name="TextAppearance.MyApp.ProfileBody" parent="TextAppearance.MaterialComponents.Headline5">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:letterSpacing">0</item>
+        <item name="android:textColor">#000000</item>
+    </style>
+
+    <style name="TextAppearance.MyApp.Duration" parent="TextAppearance.MaterialComponents.Headline6">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:letterSpacing">0</item>
+    </style>
+
+    <style name="myDialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="android:windowNoTitle">true</item>
+        <item name="colorSurface">@color/white</item>
+        <item name="materialAlertDialogTitleTextStyle">@style/MaterialAlertDialog.MaterialComponents.Title.Text</item>
+        <item name="materialAlertDialogTitlePanelStyle">@style/MaterialAlertDialog.MaterialComponents.Title.Panel</item>
+        <item name="materialAlertDialogTitleIconStyle">@style/TitleIconStyleCenter</item>
+        <item name="materialAlertDialogBodyTextStyle">@style/BodyTextStyleCenter</item>
+        <item name="buttonBarStyle">@style/ButtonBarStyle</item>
+        <item name="buttonBarPositiveButtonStyle">@style/PositiveButtonStyle</item>
+        <item name="buttonBarNegativeButtonStyle">@style/NegativeButtonStyle</item>
+    </style>
+
+    <style name="TitlePaneStyleCenter" parent="MaterialAlertDialog.MaterialComponents.Title.Panel.CenterStacked">
+        <item name="android:background">#f5f5f5</item>
+        <item name="android:padding">16dp</item>
+    </style>
+    <style name="TitleIconStyleCenter" parent="MaterialAlertDialog.MaterialComponents.Title.Icon.CenterStacked">
+        <item name="android:tint">#d50000</item>
+    </style>
+    <style name="TitleTextStyleCenter" parent="MaterialAlertDialog.MaterialComponents.Title.Text.CenterStacked">
+        <item name="android:textColor">#484848</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">20sp</item>
+    </style>
+    <style name="BodyTextStyleCenter" parent="MaterialAlertDialog.MaterialComponents.Body.Text">
+        <item name="android:padding">16dp</item>
+        <item name="android:textColor">#c7c7c7</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+    <style name="ButtonBarStyle">
+        <item name="android:background">#FFFFFF</item>
+    </style>
+
+    <style name="PositiveButtonStyle" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="android:textColor">#000000</item>
+        <item name="rippleColor">#000000</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+    <style name="NegativeButtonStyle" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="android:textColor">#757575</item>
+        <item name="rippleColor">#a4a4a4</item>
+        <item name="android:textSize">14sp</item>
     </style>
 
 </resources>

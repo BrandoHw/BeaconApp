@@ -1,11 +1,38 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
-    <!--
-        Base application theme for API 11+. This theme completely replaces
-        AppBaseTheme from res/values/styles.xml on API 11+ devices.
-    -->
-    <style name="AppBaseTheme" parent="android:Theme.Holo.Light">
-        <!-- API 11 theme customizations can go here. -->
+    <!-- Base application theme. -->
+    <style name="WorkTrack" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:textColorPrimary">@color/textColorPrimary</item>
+    </style>
+
+    <style name="Widget.WorkTrack.Toolbar" parent="Widget.AppCompat.Toolbar">
+        <item name="android:background">?attr/colorAccent</item>
+        <item name="android:theme">@style/WorkTrack</item>
+        <item name="popupTheme">@style/ThemeOverlay.AppCompat.Light</item>
+        <item name="android:textColorPrimary">@color/white</item>
+    </style>
+
+    <style name="Widget.WorkTrack.TextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="hintTextAppearance">@style/TextAppearance.WorkTrack.TextInputLayout.HintText</item>
+        <item name="hintTextColor">@color/textColorPrimary</item>
+        <item name="android:paddingBottom">8dp</item>
+        <item name="boxStrokeColor">@color/textInputOutlineColor</item>
+    </style>
+
+    <style name="TextAppearance.WorkTrack.TextInputLayout.HintText" parent="TextAppearance.MaterialComponents.Subtitle2">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+    </style>
+    <style name="Widget.WorkTrack.Button" parent="Widget.MaterialComponents.Button">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="backgroundTint">?attr/colorPrimaryDark</item>
+    </style>
+
+    <style name="Widget.WorkTrack.Button.TextButton" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
 
 </resources>

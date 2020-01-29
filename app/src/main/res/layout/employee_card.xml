@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/card_background"
+    app:cardElevation="2dp"
+    app:cardPreventCornerOverlap="true"
+    app:contentPadding="7dp">
+
+    <FrameLayout
+        android:background="@color/ltsCardColor"
+        android:layout_width="6dp"
+        android:layout_height="match_parent" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/employee_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/employee_names"
+            android:textAppearance="?attr/textAppearanceHeadline6"
+            android:textColor="@color/card_text_color" />
+
+        <TextView
+            android:singleLine="false"
+            android:id="@+id/employee_job"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/location"
+            android:layout_alignParentRight="true"
+            android:text="@string/employee_job"
+            android:textAppearance="?attr/textAppearanceBody1"
+            android:textColor="@color/card_text_color" />
+
+        <TextView
+            android:singleLine="false"
+            android:id="@+id/employee_duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/location"
+            android:layout_alignParentRight="true"
+            android:text="@string/employee_duration"
+            android:textAppearance="?attr/textAppearanceBody1"
+            android:textColor="@color/card_text_color" />
+
+    </LinearLayout>
+
+
+</com.google.android.material.card.MaterialCardView>

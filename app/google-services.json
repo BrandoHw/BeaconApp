@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "511127830811",
+    "firebase_url": "https://work-track-60b1a.firebaseio.com",
+    "project_id": "work-track-60b1a",
+    "storage_bucket": "work-track-60b1a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:511127830811:android:74803b5abb8125cdd153be",
+        "android_client_info": {
+          "package_name": "org.altbeacon.beaconreference"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "511127830811-f95i2vv4ap08eh4mkvagh031ku19mdu3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBiXMsF0dAvsfwkOkKjs-a08Th4-01kYIg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "511127830811-f95i2vv4ap08eh4mkvagh031ku19mdu3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

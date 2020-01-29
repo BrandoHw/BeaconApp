@@ -9,18 +9,43 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:name=".BeaconReferenceApplication"
         android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@mipmap/mmdt_logo_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme">
+        android:theme="@style/WorkTrack">
+        <activity android:name="org.altbeacon.InternalMap.ViewPinActivity"></activity>
+        <activity android:name=".AddNoteActivity" />
+        <activity android:name=".CalendarActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="org.altbeacon.beaconreference.MonitoringActivity" />
+        </activity>
         <activity
-            android:name=".MonitoringActivity"
-            android:label="@string/app_name"
-            android:launchMode="singleInstance">
+            android:name=".ProfileActivity"
+            android:label="@string/title_activity_profile"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="org.altbeacon.beaconreference.MonitoringActivity" />
+        </activity>
+        <activity android:name=".TimePickerActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="org.altbeacon.beaconreference.MonitoringActivity" />
+        </activity>
+        <activity
+            android:name=".BeaconSettingActivity"
+            android:label="@string/title_activity_beacon_setting"
+            android:theme="@style/WorkTrack.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="org.altbeacon.beaconreference.MonitoringActivity" />
+        </activity>
+        <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -28,11 +53,11 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".RangingActivity"
-            android:label="@string/app_name"></activity>
+            android:name=".MonitoringActivity"
+            android:label="@string/app_name" />
         <activity
-            android:name=".MapsActivityCurrentPlace"
-            android:label="Current Outside Location"></activity> <!-- uncomment the following to enable scanning for over 30 minutes on Android 7+ -->
+            android:name=".RangingActivity"
+            android:label="@string/app_name" /> <!-- uncomment the following to enable scanning for over 30 minutes on Android 7+ -->
         <service
             android:name="org.altbeacon.beacon.service.BeaconService"
             tools:node="replace">

@@ -1,2 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <color name="white">#FFFFFF</color>
+    <color name="colorPrimary">#0C6291</color>
+    <color name="colorPrimaryDark">#165B89</color>
+    <color name="colorAccent">#0C6291</color>
+    <color name="textColorPrimary">#000000</color>
+    <color name="toolbarIconColor">#FFFFFF</color>
+    <color name="loginPageBackgroundColor">#FFFFFF</color>
+    <color name="productGridBackgroundColor">#FFFFFF</color>
+    <color name="textInputOutlineColor">#3A506B</color>
+    <color name="tabTextColor">#FFFFFF</color>
+    <color name="tabIndicatorColor">#E8AD37</color>
+    <color name="ltsCardColor">#3A506B</color>
+    <color name="card_text_color">#000000</color>
+</resources>

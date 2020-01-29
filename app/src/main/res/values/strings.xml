@@ -1,8 +1,75 @@
 <resources>
 
-    <string name="app_name">BeaconReference</string>
+    <string name="app_name">Work Tracking</string>
     <string name="default_info_title">Default Location</string>
     <string name="default_info_snippet">No places found, because location permission is disabled.</string>
     <string name="option_get_place">Get place</string>
     <string name="pick_place">Choose a place</string>
+
+    <string name="mmdt_app_name">Beacon Work Tracking App</string>
+    <string name="mmdt_hint_username">Username</string>
+    <string name="mmdt_hint_password">Password</string>
+    <string name="mmdt_button_login">Login</string>
+    <string name="mmdt_button_register">Register</string>
+    <string name="mmdt_error_password">Password must contain at least 8 characters.</string>
+    <string name="mmdt_filter_title">Filter</string>
+    <string name="mmdt_search_title">Search</string>
+    <string name="mmdt_button_cancel">Back</string>
+    <string name="mmdt_button_verify">Verify Email</string>
+    <string name="mmdt_location">Location</string>
+    <string name="mmdt_duration">Duration</string>
+    <string name="mmdt_timestamp">[1999-03-03 09:09:09]</string>
+    <string name="mmdt_namespace">Namespace</string>
+    <string name="mmdt_instanceid">Instance ID</string>
+    <string name="mmdt_beaconlocation">Meeting Room</string>
+    <string name="mmdt_beacon_namespace">The Current Namespace is: 0x00112233445566778899</string>
+    <string name="mmdt_no_namespace">0x00112233445566778899</string>
+    <string name="employee_names">Name: Brandon Hwong</string>
+    <string name="employee_job">Job: Software Engineer</string>
+    <string name="employee_duration">Duration: 10hr 56m</string>
+    <!-- Backdrop menu labels -->
+    <string name="shr_featured_label">Featured</string>
+    <string name="shr_apartment_label">Apartment</string>
+    <string name="shr_accessories_label">Accessories</string>
+    <string name="shr_shoes_label">Shoes</string>
+    <string name="shr_tops_label">Tops</string>
+    <string name="shr_bottoms_label">Bottoms</string>
+    <string name="shr_dresses_label">Dresses</string>
+    <string name="shr_account_label">My Account</string>
+
+    //Tab Strings
+    <string name="tab1title">Log</string>
+    <string name="tab2title">Map</string>
+    <string name="tab3title">Settings</string>
+
+    //Map Fab
+    <string name="extended_fab_label">Set Location</string>
+    <string name="extended_fab_content">Get Place</string>
+    //Navigation Drawer
+    <string name="nav_draw_name">Brandon Hwong</string>
+    <string name="nav_draw_email">Brandon@mmdt.cc</string>
+
+    <string name="title_activity_nav_drawer">navDrawer</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings_delete">Remove all</string>
+
+    <string name="menu_home">Home</string>
+    <string name="menu_gallery">Gallery</string>
+    <string name="menu_slideshow">Slideshow</string>
+    <string name="menu_tools">Tools</string>
+    <string name="menu_share">Share</string>
+    <string name="menu_send">Send</string>
+    <string name="title_activity_beacon_setting">BeaconSettingActivity</string>
+    <string name="title_activity_profile">ProfileActivity</string>
+
+    //Profile Strings
+    <string name="profile_name">Full Name</string>
+    <string name="profile_email">Email</string>
+    <string name="profile_phonenumber">Phone number</string>
+    <string name="profile_jobtitle">Job Title</string>
+
 </resources>

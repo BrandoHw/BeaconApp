@@ -1,6 +1,8 @@
 package org.altbeacon.beaconreference;
 
 import android.app.Application;
+import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
@@ -8,21 +10,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 
-import android.app.Activity;
-import android.app.AlarmManager;
-import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-
 import androidx.core.app.NotificationCompat;
 
+import android.os.Build;
 import android.os.RemoteException;
 import android.util.Log;
 
 import com.jakewharton.threetenabp.AndroidThreeTen;
 
 import org.altbeacon.beacon.Beacon;
+import org.altbeacon.beacon.BeaconConsumer;
 import org.altbeacon.beacon.BeaconManager;
 import org.altbeacon.beacon.BeaconParser;
 import org.altbeacon.beacon.Identifier;
@@ -31,6 +28,8 @@ import org.altbeacon.beacon.Region;
 import org.altbeacon.beacon.powersave.BackgroundPowerSaver;
 import org.altbeacon.beacon.startup.RegionBootstrap;
 import org.altbeacon.beacon.startup.BootstrapNotifier;
+import org.altbeacon.bluetooth.BluetoothMedic;
+import org.altbeacon.network.LocationTimeStamp;
 import org.threeten.bp.LocalTime;
 import org.threeten.bp.ZoneId;
 
@@ -43,20 +42,26 @@ import java.util.*;
 
 /**
  */
-public class BeaconReferenceApplication extends Application implements BootstrapNotifier {
+public class BeaconReferenceApplication extends Application implements BootstrapNotifier, BeaconConsumer{
     private static final String TAG = "BeaconReferenceApp";
     private RegionBootstrap regionBootstrap;
     private BackgroundPowerSaver backgroundPowerSaver;
     private boolean haveDetectedBeaconsSinceBoot = false;
     private MonitoringActivity monitoringActivity = null;
+    private BeaconSettingActivity beaconSettingActivity = null;
+    private LocationTimestampFragment locationTimestampFragment = null;
     private String cumulativeLog = "";
     private Long tsPeriodic;
     private Long tsInRegion, tsOutRegion = null;
     private String closestLocation = null;
     private String previousClosestLocation = null;
     private double closestBeaconDist = 100;
+    BeaconManager beaconManager;
+    private Identifier myBeaconNamespaceId = Identifier.parse("0x00112233445566778898");
 
-    Identifier myBeaconNamespaceId = Identifier.parse("0x00112233445566778898");
+    private ArrayList<LocationTimeStamp> mlocationTimeStamps = new ArrayList<>();
+    //LocationTimeStamp lts = new LocationTimeStamp("Testing", getDateCurrentTimeZone(100000), getDurationBreakdown(100000));
+    private LinkedHashMap<String, Beacon> beaconList = new LinkedHashMap<String, Beacon>();
 
     @Override
     public void onCreate() {
@@ -78,15 +83,20 @@ public class BeaconReferenceApplication extends Application implements Bootstrap
 
         beaconManager.setDebug(true);
 
-        SharedPreferences sharedPreferences = getSharedPreferences("myBeacons", 0);
+
+        //Bluetooth Medic, this is responsible for recovering from a full bluetooth stack, resulting in scan failed errors
+        //This programmatically turns the bluetooth of the device on and off
+        BluetoothMedic medic = BluetoothMedic.getInstance();
+        medic.enablePowerCycleOnFailures(this);
+        medic.enablePeriodicTests(this, BluetoothMedic.SCAN_TEST | BluetoothMedic.TRANSMIT_TEST);
+
 
         // Uncomment the code below to use a foreground service to scan for beacons. This unlocks
         // the ability to continually scan for long periods of time in the background on Andorid 8+
         // in exchange for showing an icon at the top of the screen and a always-on notification to
         // communicate to users that your app is using resources in the background.
         //
-
-        /*
+    /*
         Notification.Builder builder = new Notification.Builder(this);
         builder.setSmallIcon(R.drawable.ic_launcher);
         builder.setContentTitle("Scanning for Beacons");
@@ -113,12 +123,12 @@ public class BeaconReferenceApplication extends Application implements Bootstrap
         beaconManager.setEnableScheduledScanJobs(false);
         beaconManager.setBackgroundBetweenScanPeriod(0);
         beaconManager.setBackgroundScanPeriod(1100);
-        */
-
+*/
+        SharedPreferences sharedPreferences = getSharedPreferences("myNamespace", 0);
         Log.d(TAG, "setting up background monitoring for beacons and power saving");
         // wake up the app when a beacon is seen
         if (sharedPreferences.contains("namespace")) {
-            myBeaconNamespaceId = Identifier.parse(sharedPreferences.getString("namespace", null));
+            myBeaconNamespaceId = Identifier.parse(sharedPreferences.getString("namespace", getString(R.string.mmdt_no_namespace)));
         }
         Region region = new Region("backgroundRegion",
                 myBeaconNamespaceId, null, null);
@@ -128,7 +138,8 @@ public class BeaconReferenceApplication extends Application implements Bootstrap
         // class will automatically cause the BeaconLibrary to save battery whenever the application
         // is not visible.  This reduces bluetooth power usage by about 60%
         backgroundPowerSaver = new BackgroundPowerSaver(this);
-        beaconManager.setBackgroundScanPeriod(60000);
+        //beaconManager.setBackgroundScanPeriod(60000);
+        beaconManager.bind(this);
         // If you wish to test beacon detection in the Android Emulator, you can use code like this:
         // BeaconManager.setBeaconSimulator(new TimedBeaconSimulator() );
         // ((TimedBeaconSimulator) BeaconManager.getBeaconSimulator()).createTimedSimulatedBeacons();
@@ -144,9 +155,9 @@ public class BeaconReferenceApplication extends Application implements Bootstrap
             regionBootstrap.disable();
             regionBootstrap = null;
             BeaconManager beaconManager = BeaconManager.getInstanceForApplication(this);
-            SharedPreferences sharedPreferences = getSharedPreferences("myBeacons", 0);
+            SharedPreferences sharedPreferences = getSharedPreferences("myNamespace", 0);
             if (sharedPreferences.contains("namespace")) {
-                myBeaconNamespaceId = Identifier.parse(sharedPreferences.getString("namespace", null));
+                myBeaconNamespaceId = Identifier.parse(sharedPreferences.getString("namespace", getString(R.string.mmdt_no_namespace)));
             }
 
             Region region = new Region("backgroundRegion",
@@ -157,9 +168,9 @@ public class BeaconReferenceApplication extends Application implements Bootstrap
         }
     }
     public void enableMonitoring() {
-        SharedPreferences sharedPreferences = getSharedPreferences("myBeacons", 0);
+        SharedPreferences sharedPreferences = getSharedPreferences("myNamespace", 0);
         if (sharedPreferences.contains("namespace")) {
-            myBeaconNamespaceId = Identifier.parse(sharedPreferences.getString("namespace", null));
+            myBeaconNamespaceId = Identifier.parse(sharedPreferences.getString("namespace", getString(R.string.mmdt_no_namespace)));
         }
 
         Region region = new Region("backgroundRegion",
@@ -173,18 +184,17 @@ public class BeaconReferenceApplication extends Application implements Bootstrap
         // In this example, this class sends a notification to the user whenever a Beacon
         // matching a Region (defined above) are first seen.
         Log.i(TAG, "did enter region.");
-        previousClosestLocation = "Outside";
         if (!haveDetectedBeaconsSinceBoot) {
             Log.d(TAG, "auto launching MainActivity");
 
             // The very first time since boot that we detect an beacon, we launch the
             // MainActivity
-            Intent intent = new Intent(this, MonitoringActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            //Intent intent = new Intent(this, MonitoringActivity.class);
+            //intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             // Important:  make sure to add android:launchMode="singleInstance" in the manifest
             // to keep multiple copies of this activity from getting created if the user has
             // already manually launched the app.
-            this.startActivity(intent);
+            //this.startActivity(intent);
             haveDetectedBeaconsSinceBoot = true;
 
         } else {
@@ -198,9 +208,9 @@ public class BeaconReferenceApplication extends Application implements Bootstrap
                 // the foreground, we send a notification to the user on subsequent detections.
                 Log.d(TAG, "Sending notification.");
                 sendNotification();
-                Intent myIntent = new Intent(this, MonitoringActivity.class);
-                myIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                this.startActivity(myIntent);
+                //Intent myIntent = new Intent(this, MonitoringActivity.class);
+                //myIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                //this.startActivity(myIntent);
             }
 
         }
@@ -211,10 +221,9 @@ public class BeaconReferenceApplication extends Application implements Bootstrap
         //logToDisplay("Current location is Outside");
         //if 9 am and not 6pm
         Log.i(TAG, "Exit Triggered");
-        closestLocation = "Outside";
-        Intent myIntent = new Intent(this, MapsActivityCurrentPlace.class);
-        myIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        this.startActivity(myIntent);
+        //Intent myIntent = new Intent(this, MapsActivityCurrentPlace.class);
+        //myIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        //this.startActivity(myIntent);
     }
 
     @Override
@@ -222,111 +231,58 @@ public class BeaconReferenceApplication extends Application implements Bootstrap
         logToDisplay("Current region state is: " + (state == 1 ? "INSIDE" : "OUTSIDE ("+state+")"));
         tsPeriodic = System.currentTimeMillis();
         Log.i(TAG, "The Region is" + region.toString());
+        BeaconManager beaconManager = BeaconManager.getInstanceForApplication(this);
         if (state == 1) {
-            //if 9-6
+            try {
+                beaconManager.startRangingBeaconsInRegion(region);
+            }
+            catch (RemoteException e) {
+                if (BuildConfig.DEBUG) Log.d(TAG, "Can't start ranging");
+            }
             LocalTime now = LocalTime.now(ZoneId.systemDefault());
             if (isBetweenWorkHours((now))) {
-                tsInRegion = System.currentTimeMillis();
-                if (tsOutRegion != null && previousClosestLocation != null && previousClosestLocation != closestLocation) {
+                //For outside of region to inside event
+                if (tsOutRegion != null && previousClosestLocation != null && closestLocation == "Outside" && previousClosestLocation != closestLocation) {
+                    tsInRegion = System.currentTimeMillis();
                     long timeSpent = tsInRegion - tsOutRegion;
                     long currentTime = tsInRegion;
-                    String displayTimeSpent = getDurationBreakdown(timeSpent);
-                    //convert current time to date
-                    String displayCurrentTime = getDateCurrentTimeZone(currentTime);
                     //display timespent and current time
                     previousClosestLocation = closestLocation;
-                    logToDisplay("[" + displayCurrentTime + "] Employee was in: " + previousClosestLocation + " Duration: " + displayTimeSpent);
-                    //logToDisplay("[" + displayCurrentTime + "] Employee's current location is: " + closestLocation);
+                    appendToList(previousClosestLocation, currentTime, timeSpent);
+                    updateFragment();
                 }
             }
         }
         else {
+            /*
+            try {
+                beaconManager.stopRangingBeaconsInRegion(region);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }*/
             //if 9-6
             LocalTime now = LocalTime.now(ZoneId.systemDefault());
             if (isBetweenWorkHours((now))) {
-                previousClosestLocation = closestLocation;
-                closestLocation = "Outside";
-                tsOutRegion = System.currentTimeMillis();
-                if (tsInRegion != null && previousClosestLocation != null && previousClosestLocation != closestLocation) {
+
+                if (previousClosestLocation == null) {
+                    //For starting in outside location
+                    tsOutRegion = System.currentTimeMillis();
+                    closestLocation = "Outside";
+                    //For moving from inside to outside
+                }else if (tsInRegion != null && previousClosestLocation != null && closestLocation != "Outside") {
+                    tsOutRegion = System.currentTimeMillis();
                     long timeSpent = tsOutRegion - tsInRegion;
-                    long currentTime = tsInRegion;
-                    String displayTimeSpent = getDurationBreakdown(timeSpent);
+                    long currentTime = tsOutRegion;
                     //convert current time to date
                     String displayCurrentTime = getDateCurrentTimeZone(currentTime);
                     //display timespent and current time
-                    displayTimeStampAndDuration(displayCurrentTime, displayTimeSpent);
-                    //previousClosestLocation = "Outside";
+                    previousClosestLocation = closestLocation;
+                    closestLocation = "Outside";
+                    appendToList(previousClosestLocation, currentTime, timeSpent);
+                    updateFragment();
+                    updateCurrentLocationLTS(closestLocation, displayCurrentTime);
+                    updateCurrentLocationMaps(closestLocation, displayCurrentTime);
                 }
-            }
-        }
-        //Start ranging once an enter event has occurred
-        BeaconManager beaconManager = BeaconManager.getInstanceForApplication(this);
-        RangeNotifier rangeNotifier = new RangeNotifier() {
-            @Override
-            public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
-                if (beacons.size() > 0) {
-                    Log.d(TAG, "didRangeBeaconsInRegion called with beacon count:  " + beacons.size());
-                    //Beacon firstBeacon = beacons.iterator().next();
-                    //logToDisplay("The first beacon " + firstBeacon.toString() + " is about " + firstBeacon.getDistance() + " meters away.");
-                    //if 9-6
-                    LocalTime now = LocalTime.now(ZoneId.systemDefault());
-
-                    if (isBetweenWorkHours((now))){
-                        SharedPreferences sharedPreferences = getSharedPreferences("myBeacons", 0);
-                        for (Beacon beacon : beacons) {
-                            //Log.i(TAG, "Beacon instance is: "+beacon.getId2().toString());
-                            if (sharedPreferences.contains(beacon.getId2().toString())) {
-                                String location = sharedPreferences.getString(beacon.getId2().toString(), null);
-                                double beaconDist = beacon.getDistance();
-                                Log.i(TAG, "I see a beacon that is about " + beacon.getDistance() + " meters away.");
-                                //Log.i(TAG, "The closest beacon is: "+closestBeaconDist+" meters away.");
-                                if (beaconDist < closestBeaconDist) {
-                                    closestBeaconDist = beaconDist;
-                                    closestLocation = location;
-                                    Log.i(TAG, "The closest beacon is: " + closestLocation + " meters away.");
-                                }
-
-                            }
-
-                        }
-                        //Determine closest beacon only after pinging beacons for 5 seconds to account for distance measurement errors
-                        if (tsPeriodic + 10000 <= System.currentTimeMillis()) {
-                            closestBeaconDist = 100;
-                            tsPeriodic = System.currentTimeMillis();
-                            if (closestLocation != null && (closestLocation != previousClosestLocation)) {
-                                //If this is not the first location change and the previous location was not outside the office
-                                if (previousClosestLocation != null && previousClosestLocation != "Outside") {
-                                    long currentTime = System.currentTimeMillis();
-                                    long timeSpent = currentTime - tsInRegion;
-                                    String displayTimeSpent = getDurationBreakdown(timeSpent);
-                                    //convert current time to date
-                                    String displayCurrentTime = getDateCurrentTimeZone(currentTime);
-                                    //display timespent and current time
-                                    displayTimeStampAndDuration(displayCurrentTime, displayTimeSpent);
-                                    tsInRegion = currentTime;
-                                    previousClosestLocation = closestLocation;
-                                } else {
-                                    //logToDisplay("The closest beacon is " + closestBeacon.toString() + " is about " + closestBeacon.getDistance() + " meters away.");
-                                    long currentTime = tsInRegion;
-                                    String displayCurrentTime = getDateCurrentTimeZone(currentTime);
-                                    logToDisplay("[" + displayCurrentTime + "] Employee's current location is: " + closestLocation);
-                                    Log.i(TAG, "The current location is " + closestLocation);
-                                    previousClosestLocation = closestLocation;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-        };
-        LocalTime now = LocalTime.now(ZoneId.systemDefault());
-        if (isBetweenWorkHours((now))) {
-            try {
-                beaconManager.removeAllRangeNotifiers();
-                beaconManager.startRangingBeaconsInRegion(region);
-                beaconManager.addRangeNotifier(rangeNotifier);
-            } catch (RemoteException e) {
             }
         }
     }
@@ -356,10 +312,14 @@ public class BeaconReferenceApplication extends Application implements Bootstrap
         this.monitoringActivity = activity;
     }
 
+    public void setBeaconSettingActivity(BeaconSettingActivity activity) {
+        this.beaconSettingActivity = activity;
+    }
+
     public void logToDisplay(String line) {
         cumulativeLog += (line + "\n");
         if (this.monitoringActivity != null) {
-            this.monitoringActivity.updateLog(cumulativeLog);
+            //this.monitoringActivity.updateLog(cumulativeLog);
         }
     }
 
@@ -371,7 +331,7 @@ public class BeaconReferenceApplication extends Application implements Bootstrap
         if(millis < 0) {
             throw new IllegalArgumentException("Duration must be greater than zero!");
         }
-
+        Log.i("Duration", "Miliseconds: " + millis);
         long days = TimeUnit.MILLISECONDS.toDays(millis);
         millis -= TimeUnit.DAYS.toMillis(days);
         long hours = TimeUnit.MILLISECONDS.toHours(millis);
@@ -382,12 +342,12 @@ public class BeaconReferenceApplication extends Application implements Bootstrap
 
         StringBuilder sb = new StringBuilder(64);
         sb.append(hours);
-        sb.append(" Hours ");
+        sb.append("hr ");
         sb.append(minutes);
-        sb.append(" Minutes ");
+        sb.append("m ");
         sb.append(seconds);
-        sb.append(" Seconds");
-
+        sb.append("s");
+        Log.i(TAG, sb.toString());
         return(sb.toString());
     }
     public  String getDateCurrentTimeZone(long timestamp) {
@@ -406,28 +366,24 @@ public class BeaconReferenceApplication extends Application implements Bootstrap
         return "";
     }
 
-    public void displayTimeStampAndDuration(String displayCurrentTime, String displayTimeSpent) {
-        logToDisplay("[" + displayCurrentTime + "] Employee was in: " + previousClosestLocation + " Duration: " + displayTimeSpent);
-        logToDisplay("[" + displayCurrentTime + "] Employee's current location is: " + closestLocation);
-    }
 
     public boolean isBetweenWorkHours(LocalTime now){
         int mHours = 9, mMinutes = 0, eHours = 18, eMinutes = 0;
-        SharedPreferences sharedPreferences = getSharedPreferences("myBeacons", 0);
-        if (sharedPreferences.contains("morningHours")) {
-            mHours = Integer.parseInt(sharedPreferences.getString("morningHours", null));
+        SharedPreferences sharedPreferences = getSharedPreferences("myShift", 0);
+        if (sharedPreferences.contains("mHours")) {
+            mHours = sharedPreferences.getInt("mHours", 9);
             //Log.i(TAG, "Set Time: " + Integer.toString(mHours));
         }
-        if (sharedPreferences.contains("morningMinutes")) {
-            mMinutes = Integer.parseInt(sharedPreferences.getString("morningMinutes", null));
+        if (sharedPreferences.contains("mMinutes")) {
+            mMinutes = sharedPreferences.getInt("mMinutes", 0);
             //Log.i(TAG, "Set Time: " + Integer.toString(mMinutes));
         }
-        if (sharedPreferences.contains("eveningHours")) {
-            eHours = Integer.parseInt(sharedPreferences.getString("eveningHours", null));
+        if (sharedPreferences.contains("eHours")) {
+            eHours = sharedPreferences.getInt("eHours", 18);
             //Log.i(TAG, "Set Time: " + Integer.toString(eHours));
         }
-        if (sharedPreferences.contains("eveningMinutes")) {
-            eMinutes = Integer.parseInt(sharedPreferences.getString("eveningMinutes", null));
+        if (sharedPreferences.contains("eMinutes")) {
+            eMinutes = sharedPreferences.getInt("eMinutes", 0);
             //Log.i(TAG, "Set Time: "+ Integer.toString(eMinutes));
         }
         LocalTime start = LocalTime.of(mHours, mMinutes);
@@ -437,7 +393,13 @@ public class BeaconReferenceApplication extends Application implements Bootstrap
     }
 
     public long latestTimeStamp(){
-        if (tsInRegion > tsOutRegion)
+        if (tsInRegion != null && tsOutRegion == null)
+            return tsInRegion;
+        else if (tsOutRegion != null && tsInRegion == null)
+            return tsOutRegion;
+        else if (tsOutRegion == null && tsInRegion == null)
+            return 1;
+        else if (tsInRegion > tsOutRegion)
             return tsInRegion;
         else
             return tsOutRegion;
@@ -446,6 +408,157 @@ public class BeaconReferenceApplication extends Application implements Bootstrap
     public String lastLocation(){
         return  closestLocation;
     }
-}
+
+    public void appendToList(String location, long timestamp,  long milis){
+        Log.d(TAG, "appendToList called");
+        LocationTimeStamp lts = new LocationTimeStamp(location, getDateCurrentTimeZone(timestamp), getDurationBreakdown(milis));
+        mlocationTimeStamps.add(0, lts);
+    }
+
+    public void updateFragment() {
+        Log.d(TAG, "updateFragment called");
+        if (monitoringActivity != null) {
+            if (monitoringActivity.isFragmentVisible("LTS_FRAG")) {
+                LocationTimestampFragment myFragment = monitoringActivity.returnLtsFragment();
+                myFragment.updateAdapter();
+                Log.d(TAG, "updateFragment success");
+            }
+        }
+    }
+
+    public void updateCurrentLocationLTS(String currentLocation, String timestamp){
+        Log.d(TAG, "updateCurrentLocationLTS called");
+        if (monitoringActivity != null) {
+            if (monitoringActivity.isFragmentVisible("LTS_FRAG")) {
+                LocationTimestampFragment myFragment = monitoringActivity.returnLtsFragment();
+                myFragment.updateCurrentLocation(currentLocation, timestamp);
+                Log.d(TAG, "updateCurrentLocationLTS success");
+            }
+        }
+    }
+
+
+    public void updateCurrentLocationMaps(String currentLocation, String timestamp){
+        Log.d(TAG, "updateCurrentLocationMaps called");
+        if (monitoringActivity != null) {
+            if (monitoringActivity.isFragmentVisible("MAPS_FRAG")) {
+                MapsFragment myFragment = monitoringActivity.returnMapsFragment();
+                myFragment.updateCurrentLocation(currentLocation, timestamp);
+                Log.d(TAG, "updateCurrentLocationMaps success");
+            }
+        }
+    }
+
+    public ArrayList<LocationTimeStamp> locationList(){
+        return mlocationTimeStamps;
+    }
+
+    @Override
+    public void onBeaconServiceConnect() {
+        beaconManager = BeaconManager.getInstanceForApplication(this);
+            RangeNotifier rangeNotifier = new RangeNotifier() {
+            @Override
+            public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
+                if (beacons.size() > 0) {
+                    Log.d(TAG, "didRangeBeaconsInRegion called with beacon count:  " + beacons.size());
+                    //if 9-6
+                    LocalTime now = LocalTime.now(ZoneId.systemDefault());
+                    if (isBetweenWorkHours((now))){
+                        //Check if the namespace has changed, clear the beaconList if it has
+                        SharedPreferences sp = getSharedPreferences("myNamespace", 0);
+                        if (!(myBeaconNamespaceId.toString().equals(sp.getString("namespace", getString(R.string.mmdt_no_namespace))))) {
+                            Log.i("Namespace", "Is running");
+                            myBeaconNamespaceId = Identifier.parse(sp.getString("namespace", getString(R.string.mmdt_no_namespace)));
+                            disableMonitoring();
+                            enableMonitoring();
+                            beaconList = new LinkedHashMap<String, Beacon>();
+                        }
+                        SharedPreferences sharedPreferences = getSharedPreferences("myBeacons", 0);
+                        for (Beacon beacon : beacons) {
+                            putListOfBeacons(beacon);
+                            Log.i(TAG, "Beacon instance is: "+beacon.getId2().toString());
+                            //Check if the beacon instance has been saved as a location in shared preferences
+                            if (sharedPreferences.contains(beacon.getId2().toString())) {
+                                String location = sharedPreferences.getString(beacon.getId2().toString(), null);
+                                double beaconDist = beacon.getDistance();
+                                Log.i(TAG, "I see a beacon " + location + "that is about " + beacon.getDistance() + " meters away.");
+                                //Log.i(TAG, "The closest beacon is: "+closestBeaconDist+" meters away.");
+                                if (beaconDist < closestBeaconDist) {
+                                    closestBeaconDist = beaconDist;
+                                    closestLocation = location;
+                                    Log.i(TAG, "The closest beacon is: " + closestLocation + " meters away.");
+                                }
+
+                            }
+
+                        }
+                        //Update list of beacons
+                        updateBeaconSettingActivity();
+
+                        //Determine closest beacon only after pinging beacons for 10 seconds to account for distance measurement errors
+                        if (tsPeriodic + 10000 <= System.currentTimeMillis()) {
+                            closestBeaconDist = 100;
+                            tsPeriodic = System.currentTimeMillis();
+                            Log.i(TAG, "The closest beacon is: " + closestLocation + " The previous cl is " + previousClosestLocation);
+                            if (closestLocation != null && (closestLocation != previousClosestLocation)) {
+                                //If this is not the first time a beacon is detected and the previous location was not outside the region
+                                // i.e The location has changed from one beacon to another
+                                if (previousClosestLocation != null && previousClosestLocation != "Outside") {
+                                    long currentTime = System.currentTimeMillis();
+                                    long timeSpent = currentTime - tsInRegion;
+                                    //convert current time to date
+                                    String displayCurrentTime = getDateCurrentTimeZone(currentTime);
+                                    //display timespent and current time
+                                    Log.i(TAG, "Append should be called here");
+                                    appendToList(previousClosestLocation, currentTime, timeSpent);
+                                    updateFragment();
+                                    updateCurrentLocationLTS(closestLocation, displayCurrentTime);
+                                    updateCurrentLocationMaps(closestLocation, displayCurrentTime);
+                                    tsInRegion = currentTime;
+                                    previousClosestLocation = closestLocation;
+                                }
+                                // This logic is used the first time a beacon is detected upon entering the region
+                                // i.e The location starts within range of a beacon
+                                else {
+                                    tsInRegion = System.currentTimeMillis();
+                                    long currentTime = tsInRegion;
+                                    String displayCurrentTime = getDateCurrentTimeZone(currentTime);
+                                    Log.i("Current Time", displayCurrentTime);
+                                    updateCurrentLocationLTS(closestLocation, displayCurrentTime);
+                                    updateCurrentLocationMaps(closestLocation, displayCurrentTime);
+                                    Log.i(TAG, "The current location is " + closestLocation);
+                                    previousClosestLocation = closestLocation;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+        };
+        beaconManager.removeAllRangeNotifiers();
+        beaconManager.addRangeNotifier(rangeNotifier);
+    }
+
+    public void putListOfBeacons(Beacon beacon){
+        String namespace = beacon.getId1().toString();
+        String instance = beacon.getId2().toString();
+        beaconList.put((namespace + instance), beacon);
+    }
+
+    public LinkedHashMap<String, Beacon> returnBeaconList(){
+        return beaconList;
+    }
+
+    public void updateBeaconSettingActivity() {
+        Log.d(TAG, "updateBeaconSetting called");
+        if (beaconSettingActivity != null) {
+            beaconSettingActivity.updateBeaconList();
+            Log.d(TAG, "updateBeacon success");
+        }
+    }
+
+
+    }
 
 

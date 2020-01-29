@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="org.altbeacon.InternalMap.ViewPinActivity">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_collapseMode="pin"
+        app:popupTheme="@style/WorkTrack.PopupOverlay" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/card_background">
+        <LinearLayout
+            android:id="@+id/linear_layout1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="5dp"
+            app:layout_constraintTop_toTopOf="parent">
+            <TextView
+                android:id="@+id/beacon_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Beacon Name"
+                android:textAppearance="?attr/textAppearanceHeadline5" />
+
+            <TextView
+                android:id="@+id/delay_dbm"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="100ms <-> 41 dBm"
+                android:textAppearance="?attr/textAppearanceHeadline5"
+                android:gravity="right"
+                app:layout_constraintRight_toRightOf="parent" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linear_layout2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="5dp"
+            app:layout_constraintTop_toBottomOf="@id/linear_layout1">
+            <TextView
+                android:id="@+id/mac_address"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="MAC:AC23:3F:2E:A7:B7"
+                android:textAppearance="?attr/textAppearanceHeadline5" />
+
+            <TextView
+                android:id="@+id/battery"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Battery:100%"
+                android:textAppearance="?attr/textAppearanceHeadline5"
+                android:gravity="right"
+                app:layout_constraintRight_toRightOf="parent" />
+        </LinearLayout>
+
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:id="@+id/frame_divider"
+            app:layout_constraintTop_toBottomOf="@id/linear_layout2"
+            android:background="@color/md_black_1000">
+        </FrameLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/cons_layout1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@id/frame_divider">
+
+            <TextView
+                android:id="@+id/uid"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="UID"
+                android:paddingStart="20dp"
+                android:paddingEnd="30dp"
+
+                android:gravity="center_horizontal"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+            </TextView>
+
+            <TextView
+                android:id="@+id/textView1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Rssi @ 0m"
+                app:layout_constraintLeft_toRightOf="@id/uid"
+                app:layout_constraintTop_toTopOf="parent"></TextView>
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Namespace"
+                app:layout_constraintStart_toEndOf="@+id/uid"
+                app:layout_constraintTop_toBottomOf="@id/textView1"></TextView>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Instance"
+                app:layout_constraintStart_toEndOf="@+id/uid"
+                app:layout_constraintTop_toBottomOf="@id/textView2"></TextView>
+
+
+            <TextView
+                android:id="@+id/rssi"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="-24dbm"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent"></TextView>
+
+            <TextView
+                android:id="@+id/namespace"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0x00112233445566778899"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/rssi"></TextView>
+
+            <TextView
+                android:id="@+id/instance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ABCDE0900009"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/namespace"></TextView>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/cons_layout2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="5dp"
+            app:layout_constraintTop_toBottomOf="@id/cons_layout1">
+
+            <TextView
+                android:id="@+id/TLM"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TLM"
+                android:paddingStart="20dp"
+                android:paddingEnd="24dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+            </TextView>
+
+            <TextView
+                android:id="@+id/textView4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Temperature"
+                app:layout_constraintLeft_toRightOf="@id/TLM"
+                app:layout_constraintTop_toTopOf="parent">
+            </TextView>
+
+
+            <TextView
+                android:id="@+id/textView5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Battery"
+                app:layout_constraintStart_toEndOf="@+id/TLM"
+                app:layout_constraintTop_toBottomOf="@id/textView4"></TextView>
+
+            <TextView
+                android:id="@+id/textView6"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Time Working"
+                app:layout_constraintStart_toEndOf="@+id/TLM"
+                app:layout_constraintTop_toBottomOf="@id/textView5"></TextView>
+
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="PDU Count"
+                app:layout_constraintStart_toEndOf="@+id/TLM"
+                app:layout_constraintTop_toBottomOf="@id/textView6"></TextView>
+            <TextView
+                android:id="@+id/temperature"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="25.00c"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent"></TextView>
+
+            <TextView
+                android:id="@+id/battery_mv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="3210mV"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/temperature"></TextView>
+
+            <TextView
+                android:id="@+id/time_working"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="278 days 15:31:13:300"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/battery_mv"></TextView>
+
+            <TextView
+                android:id="@+id/pdu_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="24130515"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/time_working"></TextView>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/productGridBackgroundColor"
+        android:paddingStart="@dimen/shr_product_grid_spacing"
+        android:paddingEnd="@dimen/shr_product_grid_spacing"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </androidx.core.widget.NestedScrollView>
+</LinearLayout>

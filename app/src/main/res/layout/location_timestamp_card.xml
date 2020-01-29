@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:cardBackgroundColor="@android:color/white"
+    app:cardElevation="2dp"
+    app:cardPreventCornerOverlap="true"
+    app:contentPadding="7dp">
+
+    <FrameLayout
+        android:background="@color/ltsCardColor"
+        android:layout_width="6dp"
+        android:layout_height="match_parent" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/location"
+                android:layout_width="185dp"
+                android:layout_height="wrap_content"
+                android:text="@string/mmdt_location"
+                android:textAppearance="?attr/textAppearanceHeadline6"
+                android:textColor="@color/card_text_color" />
+
+            <TextView
+                android:singleLine="false"
+                android:id="@+id/duration"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@id/location"
+                android:layout_alignParentRight="true"
+
+                android:text="1hr 59m 23s"
+                android:textAppearance="@style/TextAppearance.MyApp.Duration"
+                android:textColor="@color/card_text_color" />
+        </RelativeLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            >
+            <TextView
+                android:id="@+id/timestamp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/mmdt_timestamp"
+                android:textColor="@color/card_text_color"
+                android:textAppearance="?attr/textAppearanceBody1"
+                 />
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+</com.google.android.material.card.MaterialCardView>

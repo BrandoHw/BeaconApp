@@ -1,4 +1,11 @@
 package org.altbeacon.beaconreference;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.MenuInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+import androidx.fragment.app.Fragment;
 
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
@@ -18,6 +25,7 @@ import android.widget.TextView;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.MapView;
 import com.google.android.libraries.places.compat.GeoDataClient;
 import com.google.android.libraries.places.compat.PlaceDetectionClient;
 import com.google.android.libraries.places.compat.PlaceLikelihood;
@@ -33,17 +41,21 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.compat.Places; //New
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 
+import org.altbeacon.InternalMap.InternalMapFragment;
 import org.altbeacon.beaconreference.R;
 
 
 /**
  * An activity that displays a map showing the place at the device's current location.
  */
-public class MapsActivityCurrentPlace extends AppCompatActivity
+public class MapsFragment extends Fragment
         implements OnMapReadyCallback {
 
-    private static final String TAG = MapsActivityCurrentPlace.class.getSimpleName();
+    private static final String TAG = MapsFragment.class.getSimpleName();
     private GoogleMap mMap;
     private CameraPosition mCameraPosition;
 
@@ -76,8 +88,31 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
     private String[] mLikelyPlaceAttributions;
     private LatLng[] mLikelyPlaceLatLngs;
 
+    public static final String ARG_PAGE = "ARG_PAGE";
+
+    private MapView mapView;
+    private GoogleMap googleMap;
+
+    TextView currentLocationId;
+    TextView currentTimestampId;
+    ExtendedFloatingActionButton fab;
+    FloatingActionButton fab2;
+    public static MapsFragment newInstance(int page) {
+        Bundle args = new Bundle();
+        args.putInt(ARG_PAGE, page);
+        MapsFragment fragment = new MapsFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         // Retrieve location and camera position from saved instance state.
@@ -87,30 +122,90 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
         }
 
         // Retrieve the content view that renders the map.
-        setContentView(R.layout.activity_maps);
-
+        View view = inflater.inflate(R.layout.maps_fragment, container, false);
 
         // Construct a GeoDataClient.
-        mGeoDataClient = Places.getGeoDataClient(this);
+        mGeoDataClient = Places.getGeoDataClient(getActivity());
 
         // Construct a PlaceDetectionClient.
-        mPlaceDetectionClient = Places.getPlaceDetectionClient(this);
+        mPlaceDetectionClient = Places.getPlaceDetectionClient(getActivity());
 
         // Construct a FusedLocationProviderClient.
-        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
 
         // Build the map.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+        mapView = (MapView) view.findViewById(R.id.map);
+        mapView.onCreate(savedInstanceState);
+        mapView.onResume();
+        mapView.getMapAsync(this);
 
+        //Setup Floating Action Button
+        fab = view.findViewById(R.id.fab);
+
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showCurrentPlace();
+            }
+        });
+
+        fab2 = view.findViewById(R.id.fab2);
+        //Display FABs when the map fragment is present
+        fab.setVisibility(View.VISIBLE);
+        fab2.setVisibility(View.VISIBLE);
+
+        fab2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                fab.setVisibility(View.GONE);
+                fab2.setVisibility(View.GONE);
+                getActivity().getSupportFragmentManager().beginTransaction()
+                        .add(R.id.maps_layout, new InternalMapFragment())
+                        .addToBackStack("MapsFragment")
+                        .commit();
+            }
+        });
+
+
+        //Current Location Text View
+        currentLocationId = (TextView) view.findViewById(R.id.currentLocation);
+        currentTimestampId = (TextView) view.findViewById(R.id.currentTimestamp);
+        BeaconReferenceApplication application = ((BeaconReferenceApplication) getActivity().getApplicationContext());
+        String location = application.lastLocation();
+        long timestamp = application.latestTimeStamp();
+        String timestampString;
+        if (location == null)
+            location = "No Current Location";
+        if (timestamp == 1)
+            timestampString = " ";
+        else
+            timestampString = application.getDateCurrentTimeZone(timestamp);
+        updateCurrentLocation(application.lastLocation(),timestampString);
+        return view;
     }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.d("Lifecycle", "On Stop Called");
+    }
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d("Lifecycle", "On Resume Called");
+        fab.setVisibility(View.VISIBLE);
+        fab2.setVisibility(View.VISIBLE);
+    }
+
+    public void setFabVisible(){
+        fab.setVisibility(View.VISIBLE);
+        fab2.setVisibility(View.VISIBLE);
+    }
     /**
      * Saves the state of the map when the activity is paused.
      */
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(Bundle outState) {
         if (mMap != null) {
             outState.putParcelable(KEY_CAMERA_POSITION, mMap.getCameraPosition());
             outState.putParcelable(KEY_LOCATION, mLastKnownLocation);
@@ -124,9 +219,9 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
      * @return Boolean.
      */
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.current_place_menu, menu);
-        return true;
+    public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+        menuInflater.inflate(R.menu.current_place_menu, menu);
+        super.onCreateOptionsMenu(menu, menuInflater);
     }
 
     /**
@@ -163,8 +258,10 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
             @Override
             public View getInfoContents(Marker marker) {
                 // Inflate the layouts for the info window, title and snippet.
+
+                //getView() will optain the view of thee current fragment
                 View infoWindow = getLayoutInflater().inflate(R.layout.custom_info_contents,
-                        (FrameLayout) findViewById(R.id.map), false);
+                        (FrameLayout) getView().findViewById(R.id.map), false);
 
                 TextView title = ((TextView) infoWindow.findViewById(R.id.title));
                 title.setText(marker.getTitle());
@@ -197,7 +294,7 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
         try {
             if (mLocationPermissionGranted) {
                 Task<Location> locationResult = mFusedLocationProviderClient.getLastLocation();
-                locationResult.addOnCompleteListener(this, new OnCompleteListener<Location>() {
+                locationResult.addOnCompleteListener(getActivity(), new OnCompleteListener<Location>() {
                     @Override
                     public void onComplete(@NonNull Task<Location> task) {
                         if (task != null) {
@@ -231,12 +328,12 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
          * device. The result of the permission request is handled by a callback,
          * onRequestPermissionsResult.
          */
-        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
+        if (ContextCompat.checkSelfPermission(getActivity().getApplicationContext(),
                 android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             mLocationPermissionGranted = true;
         } else {
-            ActivityCompat.requestPermissions(this,
+            ActivityCompat.requestPermissions(getActivity(),
                     new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
                     PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
         }
@@ -351,10 +448,15 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                 // The "which" argument contains the position of the selected item.
                 LatLng markerLatLng = mLikelyPlaceLatLngs[which];
                 String markerSnippet = mLikelyPlaceAddresses[which];
+                String markerName = mLikelyPlaceNames[which];
+                Log.i("Location", "The location is " + markerSnippet);
+                Log.i("Location", "The location is " + markerName);
                 if (mLikelyPlaceAttributions[which] != null) {
                     markerSnippet = markerSnippet + "\n" + mLikelyPlaceAttributions[which];
                 }
 
+                //Remove old markers
+                mMap.clear();
                 // Add a marker for the selected place, with an info window
                 // showing information about that place.
                 mMap.addMarker(new MarkerOptions()
@@ -369,7 +471,7 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
         };
 
         // Display the dialog.
-        AlertDialog dialog = new AlertDialog.Builder(this)
+        AlertDialog dialog = new AlertDialog.Builder(getActivity())
                 .setTitle(R.string.pick_place)
                 .setItems(mLikelyPlaceNames, listener)
                 .show();
@@ -396,4 +498,10 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
             Log.e("Exception: %s", e.getMessage());
         }
     }
+
+    public void updateCurrentLocation(String currentLocation, String timeStamp){
+        currentLocationId.setText("Current Location: " + currentLocation);
+        currentTimestampId.setText("[" + timeStamp + "]");
+    }
+
 }

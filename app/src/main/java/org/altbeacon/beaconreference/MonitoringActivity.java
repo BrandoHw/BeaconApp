@@ -21,10 +21,12 @@ import android.text.Spanned;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CalendarView;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.text.DateFormat;
@@ -34,7 +36,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.Calendar;
 import java.text.SimpleDateFormat;
 import java.util.*;
-
 
 import java.util.HashMap;
 import java.util.Map;
@@ -47,8 +48,37 @@ import org.altbeacon.beacon.Identifier;
 import org.altbeacon.beacon.MonitorNotifier;
 import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
+import org.altbeacon.network.LocationTimeStamp;
 
 import java.util.Collection;
+
+
+//Materials Design
+import android.os.Bundle;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.tabs.TabLayout;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.mikepenz.materialdrawer.AccountHeader;
+import com.mikepenz.materialdrawer.AccountHeaderBuilder;
+import com.mikepenz.materialdrawer.Drawer;
+import com.mikepenz.materialdrawer.DrawerBuilder;
+import com.mikepenz.materialdrawer.model.DividerDrawerItem;
+import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
+import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
+import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
+import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
+import com.mikepenz.materialdrawer.model.interfaces.IProfile;
+
+import androidx.fragment.app.Fragment;
+import androidx.viewpager.widget.PagerAdapter;
+import androidx.viewpager.widget.ViewPager;
+import androidx.appcompat.app.AppCompatActivity;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import androidx.appcompat.widget.Toolbar;
 
 /**
  */
@@ -66,12 +96,30 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
 	InputFilter timeFilter;
 	private boolean doneOnce = false;
 
+	//Shared Preferences
 	public static final String myPreference = "myBeacons";
 	Identifier myBeaconNamespaceId = Identifier.parse("0x00112233445566778898");
 
+	//Alarm Manager
 	private int mHours = 9, mMinutes = 0, eHours = 18, eMinutes = 0;
 	private AlarmManager alarmMgr;
 	private PendingIntent alarmIntent, alarmIntent2;
+
+	//Layout
+	private Toolbar toolbar;
+	private TabLayout tabLayout;
+	private ViewPager viewPager;
+	private int[] tabIcons = {
+			R.drawable.logicon,
+			R.drawable.ic_map_black_24dp,
+			R.drawable.ic_settings_black_24dp
+	};
+	ProfileDrawerItem profile;
+	AccountHeader headerResult;
+
+	//Firebase
+	private FirebaseAuth.AuthStateListener mAuthListener;
+	private FirebaseAuth mAuth;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -80,77 +128,116 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
 		setContentView(R.layout.activity_monitoring);
 		verifyBluetooth();
 
+//		if (savedInstanceState == null) {
+//			getSupportFragmentManager()
+//					.beginTransaction()
+//					.add(R.id.container, new org.altbeacon.beaconreference.LocationTimestampFragment(), "LTS_FRAGMENT")
+//					.commit();
+//		}
+		//Setup Toolbar
+		toolbar = (Toolbar) findViewById(R.id.app_bar);
+		setSupportActionBar(toolbar);
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-		namespaceID = (TextView) findViewById(R.id.editTextName);
-		instanceID = (TextView) findViewById(R.id.editTextInstance);
-		locationID = (TextView) findViewById(R.id.editTextLocation);
-		timeID1 = (TextView) findViewById(R.id.editTextMorning);
-		timeID2 = (TextView) findViewById(R.id.editTextEvening);
+		//Setup Nav Drawer
+		PrimaryDrawerItem item1 = new PrimaryDrawerItem().withIdentifier(1).withName("Home").withIcon(R.drawable.nav_ic_home_black_24dp);
+		SecondaryDrawerItem item2 = new SecondaryDrawerItem().withIdentifier(2).withName("My Profile").withIcon(R.drawable.nav_ic_person_outline_black_24dp);;
+		SecondaryDrawerItem item3 = new SecondaryDrawerItem().withIdentifier(3).withName("Beacons").withIcon(R.drawable.nav_ic_bluetooth_searching_black_24dp);
+		SecondaryDrawerItem item4 = new SecondaryDrawerItem().withIdentifier(4).withName("Calendar").withIcon(R.drawable.nav_ic_calendar_today_24px);
+		SecondaryDrawerItem item5 = new SecondaryDrawerItem().withIdentifier(5).withName("Logout").withIcon(R.drawable.nav_ic_exit_to_app_black_24dp);;
 
-		sharedpreferences = getSharedPreferences(myPreference,
-				Context.MODE_PRIVATE);
+		// Create the AccountHeader for the Nav Drawer
+		sharedpreferences = getSharedPreferences("myProfile", 0);
+		String navDrawHeaderName = sharedpreferences.getString("profileName", "Set your name in your profile page");
+		String navDrawHeaderEmail = sharedpreferences.getString("profileEmail", "Set your email in your profile page");
 
+		profile = new ProfileDrawerItem().withName(navDrawHeaderName).withEmail(navDrawHeaderEmail)
+				.withIcon(getResources().getDrawable(R.drawable.employee));
+
+		headerResult = new AccountHeaderBuilder()
+				.withActivity(this)
+				.withHeaderBackground(R.drawable.header)
+				.addProfiles(profile)
+				.withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
+					@Override
+					public boolean onProfileChanged(View view, IProfile profile, boolean currentProfile) {
+						return false;
+					}
+				})
+				.build();
+
+		//create the drawer and remember the `Drawer` result object
+		Drawer result = new DrawerBuilder()
+				.withActivity(this)
+				.withToolbar(toolbar)
+				.withAccountHeader(headerResult)
+				.addDrawerItems(
+						item1,
+						new DividerDrawerItem(),
+						item2,
+						item3,
+						item4,
+						new DividerDrawerItem(),
+						item5
+				)
+				.withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+					@Override
+					public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+						switch ((int) drawerItem.getIdentifier()) {
+							case 2:
+								startActivity(new Intent(MonitoringActivity.this, ProfileActivity.class));
+								break;
+							case 3:
+								startActivity(new Intent(MonitoringActivity.this, BeaconSettingActivity.class));
+								break;
+							case 4:
+								startActivity(new Intent(MonitoringActivity.this, CalendarActivity.class));
+								break;
+							case 5:
+								FirebaseAuth.getInstance().signOut();
+								FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+								Log.i("Firebase", "Check if user is null: " + user);
+								startActivity(new Intent(MonitoringActivity.this, MainActivity.class));
+								break;
+							default:
+								return true;
+						}
+						return false;
+					}
+				})
+				.build();
+		// Get the ViewPager and set it's PagerAdapter so that it can display items
+		viewPager = (ViewPager) findViewById(R.id.view_pager);
+		viewPager.setAdapter(new TabPagerAdapter(getSupportFragmentManager(),
+				MonitoringActivity.this));
+
+		// Give the TabLayout the ViewPager
+		tabLayout = (TabLayout) findViewById(R.id.tabs);
+		tabLayout.setupWithViewPager(viewPager);
+		setupViewPager(viewPager);
+		setupTabIcons();
+
+
+		//Firebase sign out observer
+		mAuthListener = new FirebaseAuth.AuthStateListener() {
+			@Override
+			public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+				FirebaseUser user = firebaseAuth.getCurrentUser();
+				if (user != null) {
+					// User is signed in
+					Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+				} else {
+					// User is signed out
+					Log.d(TAG, "onAuthStateChanged:signed_out");
+				}
+				// ...
+			}
+		};
+
+		//Bind The beaconmanager,
 		beaconManager.bind(this);
 		beaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout(BeaconParser.EDDYSTONE_UID_LAYOUT));
 
-		timeFilter = new InputFilter() {
-			@Override
-			public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
-
-				if (source.length() > 1 && doneOnce == false) {
-					source = source.subSequence(source.length() - 1, source.length());
-					if (source.charAt(0) >= '0' && source.charAt(0) <= '2') {
-						doneOnce = true;
-						return source;
-					} else {
-						return "";
-					}
-				}
-
-
-				if (source.length() == 0) {
-					return null;// deleting, keep original editing
-				}
-				String result = "";
-				result += dest.toString().substring(0, dstart);
-				result += source.toString().substring(start, end);
-				result += dest.toString().substring(dend, dest.length());
-
-				if (result.length() > 5) {
-					return "";// do not allow this edit
-				}
-				boolean allowEdit = true;
-				char c;
-				if (result.length() > 0) {
-					c = result.charAt(0);
-					allowEdit &= (c >= '0' && c <= '2');
-				}
-				if (result.length() > 1) {
-					c = result.charAt(1);
-					if (result.charAt(0) == '0' || result.charAt(0) == '1')
-						allowEdit &= (c >= '0' && c <= '9');
-					else
-						allowEdit &= (c >= '0' && c <= '3');
-				}
-				if (result.length() > 2) {
-					c = result.charAt(2);
-					allowEdit &= (c == ':');
-				}
-				if (result.length() > 3) {
-					c = result.charAt(3);
-					allowEdit &= (c >= '0' && c <= '5');
-				}
-				if (result.length() > 4) {
-					c = result.charAt(4);
-					allowEdit &= (c >= '0' && c <= '9');
-				}
-				return allowEdit ? null : "";
-			}
-
-		};
-
-		timeID1.setFilters(new InputFilter[]{timeFilter});
-		timeID2.setFilters(new InputFilter[]{timeFilter});
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 			if (this.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
 					== PackageManager.PERMISSION_GRANTED) {
@@ -224,22 +311,22 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
 		Calendar scheduleCalendar2 = Calendar.getInstance();
 		scheduleCalendar2.setTimeInMillis(System.currentTimeMillis());
 
-		SharedPreferences sharedPreferences = getSharedPreferences("myBeacons", 0);
-		if (sharedPreferences.contains("morningHours")) {
-			mHours = Integer.parseInt(sharedPreferences.getString("morningHours", null));
-			Log.i(TAG, "Set Time: " + Integer.toString(mHours));
+		SharedPreferences sharedPreferences = getSharedPreferences("myShift", 0);
+		if (sharedPreferences.contains("mHours")) {
+			mHours = sharedPreferences.getInt("mHours", 9);
+			//Log.i(TAG, "Set Time: " + Integer.toString(mHours));
 		}
-		if (sharedPreferences.contains("morningMinutes")) {
-			mMinutes = Integer.parseInt(sharedPreferences.getString("morningMinutes", null));
-			Log.i(TAG, "Set Time: " + Integer.toString(mMinutes));
+		if (sharedPreferences.contains("mMinutes")) {
+			mMinutes = sharedPreferences.getInt("mMinutes", 0);
+			//Log.i(TAG, "Set Time: " + Integer.toString(mMinutes));
 		}
-		if (sharedPreferences.contains("eveningHours")) {
-			eHours = Integer.parseInt(sharedPreferences.getString("eveningHours", null));
-			Log.i(TAG, "Set Time: " + Integer.toString(eHours));
+		if (sharedPreferences.contains("eHours")) {
+			eHours = sharedPreferences.getInt("eHours", 18);
+			//Log.i(TAG, "Set Time: " + Integer.toString(eHours));
 		}
-		if (sharedPreferences.contains("eveningMinutes")) {
-			eMinutes = Integer.parseInt(sharedPreferences.getString("eveningMinutes", null));
-			Log.i(TAG, "Set Time: "+ Integer.toString(eMinutes));
+		if (sharedPreferences.contains("eMinutes")) {
+			eMinutes = sharedPreferences.getInt("eMinutes", 0);
+			//Log.i(TAG, "Set Time: "+ Integer.toString(eMinutes));
 		}
 
 		scheduleCalendar.set(Calendar.HOUR_OF_DAY, mMinutes);
@@ -256,8 +343,6 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
 
 
 
-
-
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
@@ -269,7 +354,7 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
 										   String permissions[], int[] grantResults) {
 		switch (requestCode) {
 			case PERMISSION_REQUEST_FINE_LOCATION: {
-				if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+				if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 					Log.d(TAG, "fine location permission granted");
 				} else {
 					final AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -309,79 +394,13 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
 		}
 	}
 
-	public void onRangingClicked(View view) {
-		Intent myIntent = new Intent(this,RangingActivity.class);
-		this.startActivity(myIntent);
-	}
-	public void onEnableClicked(View view) {
-		BeaconReferenceApplication application = ((BeaconReferenceApplication) this.getApplicationContext());
-		if (BeaconManager.getInstanceForApplication(this).getMonitoredRegions().size() > 0) {
-			application.disableMonitoring();
-			((Button)findViewById(R.id.enableButton)).setText("Re-Enable Monitoring");
-		}
-		else {
-			((Button)findViewById(R.id.enableButton)).setText("Disable Monitoring");
-			application.enableMonitoring();
-		}
-
-	}
-
-	public void onAddClicked(View view) {
-		String n = namespaceID.getText().toString();
-		String i = instanceID.getText().toString();
-		String l = locationID.getText().toString();
-		SharedPreferences.Editor editor = sharedpreferences.edit();
-		editor.putString("namespace", n);
-		editor.putString(i, l);
-		editor.commit();
-		Toast toast = Toast.makeText(this, "Beacon Added", Toast.LENGTH_LONG);
-		toast.show();
-	}
-	public void onRemoveClicked(View view) {
-		String n = namespaceID.getText().toString();
-		String i = instanceID.getText().toString();
-		SharedPreferences.Editor editor = sharedpreferences.edit();
-		editor.remove("namespace").commit();
-		editor.remove(i).commit();
-		Toast toast = Toast.makeText(this, "Beacon Removed", Toast.LENGTH_LONG);
-		toast.show();
-	}
-
-	public void onAddScheduleClicked(View view) {
-		String morning = timeID1.getText().toString();
-		String evening = timeID2.getText().toString();
-		String hours1 = "9";
-		String hours2 = "18";
-		String minutes1 = "0";
-		String minutes2 = "0";
-		if (morning.length() > 4)
-		{
-			hours1 = morning.substring(0, 2);
-			minutes1 = morning.substring(morning.length() - 2);
-		}
-		if (evening.length() > 4)
-		{
-			hours2 = evening.substring(0, 2);
-			minutes2 = evening.substring(evening.length() - 2);
-		}
-
-		SharedPreferences.Editor editor = sharedpreferences.edit();
-		editor.putString("morningHours", hours1);
-		editor.putString("morningMinutes", minutes1);
-		editor.putString("eveningHours", hours2);
-		editor.putString("eveningMinutes", minutes2);
-		editor.commit();
-		Toast toast = Toast.makeText(this, "Schedule Changed", Toast.LENGTH_LONG);
-		toast.show();
-
-	}
-
     @Override
     public void onResume() {
         super.onResume();
         BeaconReferenceApplication application = ((BeaconReferenceApplication) this.getApplicationContext());
         application.setMonitoringActivity(this);
-        updateLog(application.getLog());
+		headerResult.updateProfile(profile);
+        //updateLog(application.getLog());
     }
 
     @Override
@@ -428,15 +447,15 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
 
 	}
 
-    public void updateLog(final String log) {
-    	runOnUiThread(new Runnable() {
-    	    public void run() {
-    	    	EditText editText = (EditText)MonitoringActivity.this
-    					.findViewById(R.id.monitoringText);
-       	    	editText.setText(log);
-    	    }
-    	});
-    }
+//    public void updateLog(final String log) {
+//    	runOnUiThread(new Runnable() {
+//    	    public void run() {
+//    	    	EditText editText = (EditText)MonitoringActivity.this
+//    					.findViewById(R.id.monitoringText);
+//       	    	editText.setText(log);
+//    	    }
+//    	});
+//    }
 
 	@Override
 	public void onBeaconServiceConnect() {
@@ -452,4 +471,45 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
 			beaconManager.startMonitoringBeaconsInRegion(region);
 		} catch (RemoteException e) {    }
 	}
+
+	public boolean isFragmentVisible(String fragName){
+		Log.d(TAG, "isFragmentVisible called");
+		TabPagerAdapter adapter = (TabPagerAdapter) viewPager.getAdapter();
+		Fragment myFragment = adapter.returnFragment(fragName);
+		return (myFragment != null && myFragment.isVisible());
+	}
+
+	public LocationTimestampFragment returnLtsFragment(){
+		TabPagerAdapter adapter = (TabPagerAdapter) viewPager.getAdapter();
+		LocationTimestampFragment myFragment = (LocationTimestampFragment) adapter.returnFragment("LTS_FRAG");
+		return myFragment;
+	}
+
+	public MapsFragment returnMapsFragment(){
+		TabPagerAdapter adapter = (TabPagerAdapter) viewPager.getAdapter();
+		MapsFragment myFragment = (MapsFragment) adapter.returnFragment("MAPS_FRAG");
+		return myFragment;
+	}
+
+	private void setupViewPager(ViewPager viewPager) {
+		TabPagerAdapter adapter = (TabPagerAdapter) viewPager.getAdapter();
+		//adapter.addFrag(new LocationTimestampFragment(), "LTS_FRAG");
+		//adapter.addFrag(new MapsFragment(), "MAPS_FRAG");
+		//adapter.addFrag(new MapsFragment(), "SETTINGS_FRAG");
+		viewPager.setAdapter(adapter);
+	}
+
+	private void setupTabIcons() {
+		tabLayout.getTabAt(0).setIcon(tabIcons[0]);
+		tabLayout.getTabAt(1).setIcon(tabIcons[1]);
+		tabLayout.getTabAt(2).setIcon(tabIcons[2]);
+	}
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+		headerResult.updateProfile(profile);
+	}
+
+
 }
