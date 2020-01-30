@@ -1,4 +1,4 @@
-package org.altbeacon.beaconreference;
+package org.altbeacon.WorkTracking;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -10,18 +10,16 @@ import androidx.fragment.app.Fragment;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.os.Bundle;
+
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
+
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.TextView;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -33,7 +31,6 @@ import com.google.android.libraries.places.compat.PlaceLikelihoodBufferResponse;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -43,10 +40,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.compat.Places; //New
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 
 import org.altbeacon.InternalMap.InternalMapFragment;
-import org.altbeacon.beaconreference.R;
 
 
 /**
@@ -93,6 +88,7 @@ public class MapsFragment extends Fragment
     private MapView mapView;
     private GoogleMap googleMap;
 
+    private String setLocation;
     TextView currentLocationId;
     TextView currentTimestampId;
     ExtendedFloatingActionButton fab;
@@ -170,7 +166,7 @@ public class MapsFragment extends Fragment
         //Current Location Text View
         currentLocationId = (TextView) view.findViewById(R.id.currentLocation);
         currentTimestampId = (TextView) view.findViewById(R.id.currentTimestamp);
-        BeaconReferenceApplication application = ((BeaconReferenceApplication) getActivity().getApplicationContext());
+        MainApplication application = ((MainApplication) getActivity().getApplicationContext());
         String location = application.lastLocation();
         long timestamp = application.latestTimeStamp();
         String timestampString;
@@ -467,6 +463,15 @@ public class MapsFragment extends Fragment
                 // Position the map's camera at the location of the marker.
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(markerLatLng,
                         DEFAULT_ZOOM));
+
+                MainApplication application =(MainApplication) getActivity().getApplicationContext();
+                if (application.lastLocation() == "Outside"){
+                    setLocation = markerName;
+                    String latestTimestamp = application.getDateCurrentTimeZone(application.latestTimeStamp());
+                    updateCurrentLocation(setLocation, latestTimestamp);
+                    application.updateCurrentLocationLTS(setLocation, latestTimestamp);
+                    application.setLocation(setLocation);
+                }
             }
         };
 

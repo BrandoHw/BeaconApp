@@ -1,4 +1,4 @@
-package org.altbeacon.beaconreference;
+package org.altbeacon.WorkTracking;
 
 import android.content.SharedPreferences;
 import android.util.Log;

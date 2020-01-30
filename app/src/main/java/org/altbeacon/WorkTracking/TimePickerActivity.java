@@ -1,25 +1,17 @@
-package org.altbeacon.beaconreference;
+package org.altbeacon.WorkTracking;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 
-import android.app.TimePickerDialog;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Bundle;
 //import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TimePicker;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-
-import java.util.Calendar;
 
 public class TimePickerActivity extends AppCompatActivity {
 
@@ -77,7 +69,7 @@ public class TimePickerActivity extends AppCompatActivity {
                 editor.putInt("eHours", hour2);
                 editor.putInt("eMinutes", minute2);
                 editor.commit();
-                Log.i("Alarmo", "Main" + hour1 + " " + minute1 + " " + hour2 + " " + minute2);
+                Log.i("Alarm", "Main" + hour1 + " " + minute1 + " " + hour2 + " " + minute2);
                 finish();
             }
         });

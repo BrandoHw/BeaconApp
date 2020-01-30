@@ -1,8 +1,6 @@
 package org.altbeacon.InternalMap;
 
 
-import org.altbeacon.network.LocationTimeStamp;
-
 /**
  * Employee information to be displayed in a list for each beacon
  */

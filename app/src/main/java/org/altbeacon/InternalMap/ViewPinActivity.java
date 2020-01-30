@@ -6,17 +6,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
-import org.altbeacon.beacon.Beacon;
-import org.altbeacon.beaconreference.BeaconReferenceApplication;
-import org.altbeacon.beaconreference.BeaconSettingsRecycleViewAdapter;
-import org.altbeacon.beaconreference.R;
+import org.altbeacon.WorkTracking.MainApplication;
+import org.altbeacon.WorkTracking.R;
 
 import java.util.ArrayList;
 
@@ -38,7 +32,7 @@ public class ViewPinActivity extends AppCompatActivity implements ViewPinRecycle
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 
-        BeaconReferenceApplication application = ((BeaconReferenceApplication) getApplicationContext());
+        MainApplication application = ((MainApplication) getApplicationContext());
         // Inflate the layout for this fragment with the ProductGrid theme
 
         // Set up the RecyclerView
@@ -50,6 +44,17 @@ public class ViewPinActivity extends AppCompatActivity implements ViewPinRecycle
 
 
     }
+
+    public void updateEmployeeList(){
+        MainApplication application = ((MainApplication) getApplicationContext());
+        //Log.i(TAG, "Attempting adapter update");
+        if (!application.returnBeaconList().isEmpty()) {
+            //Log.i(TAG, "Successful adapter update");
+            Log.i(TAG, "The size is: " + application.returnBeaconList().size());
+           // mBeaconArray = mAdapter.update(application.returnBeaconList());
+        }
+    }
+
 
     @Override
     public void onCardClick(int position) {

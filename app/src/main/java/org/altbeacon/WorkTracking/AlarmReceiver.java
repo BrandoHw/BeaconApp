@@ -1,4 +1,4 @@
-package org.altbeacon.beaconreference;
+package org.altbeacon.WorkTracking;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -7,8 +7,6 @@ import android.util.Log;
 import org.threeten.bp.LocalTime;
 import org.threeten.bp.ZoneId;
 
-import org.altbeacon.beacon.startup.RegionBootstrap;
-
 
 public class AlarmReceiver extends BroadcastReceiver {
     private static final String TAG = "AlarmReceiver";
@@ -16,7 +14,7 @@ public class AlarmReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         Log.i(TAG, "Alarm Manager is WORKING");
         LocalTime now = LocalTime.now(ZoneId.systemDefault());
-        BeaconReferenceApplication application = ((BeaconReferenceApplication) context.getApplicationContext());
+        MainApplication application = ((MainApplication) context.getApplicationContext());
         if (application.isBetweenWorkHours(now)) {
             application.enableMonitoring();
         } else {

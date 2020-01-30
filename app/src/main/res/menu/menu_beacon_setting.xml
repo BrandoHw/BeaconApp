@@ -1,7 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="org.altbeacon.beaconreference.BeaconSettingActivity">
+    tools:context="org.altbeacon.WorkTracking.BeaconSettingActivity">
     <item
         android:id="@+id/beacon_settings_delete"
         android:icon="@drawable/ic_more_vert_white_24dp"

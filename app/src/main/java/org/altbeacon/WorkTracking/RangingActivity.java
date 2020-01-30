@@ -1,24 +1,17 @@
-package org.altbeacon.beaconreference;
+package org.altbeacon.WorkTracking;
 
-import java.util.ArrayList;
 import java.util.Collection;
-
-import android.app.Activity;
 
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Log;
 import android.widget.EditText;
 
-import android.content.SharedPreferences;
-
 import androidx.appcompat.app.AppCompatActivity;
 
-import org.altbeacon.beacon.AltBeacon;
 import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconConsumer;
 import org.altbeacon.beacon.BeaconManager;
-import org.altbeacon.beacon.BeaconParser;
 import org.altbeacon.beacon.Identifier;
 import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;

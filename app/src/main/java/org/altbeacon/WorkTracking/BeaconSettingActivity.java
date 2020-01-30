@@ -1,14 +1,10 @@
-package org.altbeacon.beaconreference;
+package org.altbeacon.WorkTracking;
 
-import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
-import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,7 +13,6 @@ import androidx.core.app.NavUtils;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -30,7 +25,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.altbeacon.beacon.Beacon;
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 
@@ -49,7 +43,7 @@ public class BeaconSettingActivity extends AppCompatActivity implements BeaconSe
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 
-        BeaconReferenceApplication application = ((BeaconReferenceApplication) getApplicationContext());
+        MainApplication application = ((MainApplication) getApplicationContext());
         // Inflate the layout for this fragment with the ProductGrid theme
 
         // Set up the RecyclerView
@@ -100,7 +94,7 @@ public class BeaconSettingActivity extends AppCompatActivity implements BeaconSe
     @Override
     public void onResume() {
         super.onResume();
-        BeaconReferenceApplication application = ((BeaconReferenceApplication) this.getApplicationContext());
+        MainApplication application = ((MainApplication) this.getApplicationContext());
         application.setBeaconSettingActivity(this);
         //updateLog(application.getLog());
     }
@@ -108,11 +102,11 @@ public class BeaconSettingActivity extends AppCompatActivity implements BeaconSe
     @Override
     public void onPause() {
         super.onPause();
-        ((BeaconReferenceApplication) this.getApplicationContext()).setBeaconSettingActivity(null);
+        ((MainApplication) this.getApplicationContext()).setBeaconSettingActivity(null);
     }
 
     public void updateBeaconList(){
-        BeaconReferenceApplication application = ((BeaconReferenceApplication) getApplicationContext());
+        MainApplication application = ((MainApplication) getApplicationContext());
         //Log.i(TAG, "Attempting adapter update");
         if (!application.returnBeaconList().isEmpty()) {
             //Log.i(TAG, "Successful adapter update");

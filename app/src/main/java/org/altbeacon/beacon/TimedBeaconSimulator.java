@@ -21,7 +21,7 @@ public class TimedBeaconSimulator implements org.altbeacon.beacon.simulator.Beac
 	 * You may simulate detection of beacons by creating a class like this in your project.
 	 * This is especially useful for when you are testing in an Emulator or on a device without BluetoothLE capability.
 	 * 
-	 * Uncomment the lines in BeaconReferenceApplication starting with:
+	 * Uncomment the lines in MainApplication starting with:
 	 *     // If you wish to test beacon detection in the Android Emulator, you can use code like this:
 	 * Then set USE_SIMULATED_BEACONS = true to initialize the sample code in this class.
 	 * If using a Bluetooth incapable test device (i.e. Emulator), you will want to comment

@@ -1,62 +1,36 @@
-package org.altbeacon.beaconreference;
+package org.altbeacon.WorkTracking;
 
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.AlarmManager;
-import android.app.AppComponentFactory;
 import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.text.InputFilter;
-import android.text.Spanned;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.CalendarView;
-import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.text.DateFormat;
-import java.util.Collection;
-import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
 import java.util.Calendar;
-import java.text.SimpleDateFormat;
-import java.util.*;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconConsumer;
 import org.altbeacon.beacon.BeaconManager;
 import org.altbeacon.beacon.BeaconParser;
 import org.altbeacon.beacon.Identifier;
-import org.altbeacon.beacon.MonitorNotifier;
-import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
-import org.altbeacon.network.LocationTimeStamp;
-
-import java.util.Collection;
 
 
 //Materials Design
-import android.os.Bundle;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -72,12 +46,7 @@ import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 
 import androidx.fragment.app.Fragment;
-import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
-import androidx.appcompat.app.AppCompatActivity;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
 import androidx.appcompat.widget.Toolbar;
 
 /**
@@ -397,7 +366,7 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
     @Override
     public void onResume() {
         super.onResume();
-        BeaconReferenceApplication application = ((BeaconReferenceApplication) this.getApplicationContext());
+        MainApplication application = ((MainApplication) this.getApplicationContext());
         application.setMonitoringActivity(this);
 		headerResult.updateProfile(profile);
         //updateLog(application.getLog());
@@ -406,7 +375,7 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
     @Override
     public void onPause() {
         super.onPause();
-        ((BeaconReferenceApplication) this.getApplicationContext()).setMonitoringActivity(null);
+        ((MainApplication) this.getApplicationContext()).setMonitoringActivity(null);
     }
 
 	private void verifyBluetooth() {

@@ -1,11 +1,11 @@
-package org.altbeacon.beaconreference;
+package org.altbeacon.WorkTracking;
 
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
-import org.altbeacon.beaconreference.R;
+import org.altbeacon.WorkTracking.R;
 
 public class MainActivity extends AppCompatActivity implements NavigationHost {
 
@@ -17,7 +17,7 @@ public class MainActivity extends AppCompatActivity implements NavigationHost {
         if (savedInstanceState == null) {
             getSupportFragmentManager()
                     .beginTransaction()
-                    .add(R.id.container, new org.altbeacon.beaconreference.LoginFragment())
+                    .add(R.id.container, new org.altbeacon.WorkTracking.LoginFragment())
                     .commit();
         }
     }

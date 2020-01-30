@@ -1,7 +1,5 @@
 package org.altbeacon.InternalMap;
 
-import android.app.Activity;
-import android.content.SharedPreferences;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,13 +9,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.altbeacon.beacon.Beacon;
-import org.altbeacon.beaconreference.BeaconSettingActivity;
-import org.altbeacon.beaconreference.R;
-import org.altbeacon.network.LocationTimeStamp;
+import org.altbeacon.WorkTracking.R;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 
 public class ViewPinRecyclerAdapter extends RecyclerView.Adapter<ViewPinRecyclerAdapter.PinViewHolder>{
 
@@ -84,6 +78,7 @@ public class ViewPinRecyclerAdapter extends RecyclerView.Adapter<ViewPinRecycler
         notifyDataSetChanged();
         return mEmployeeArray;
     }
+
 
 
     public interface OnCardClickListener{

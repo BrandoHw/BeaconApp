@@ -1,8 +1,6 @@
-package org.altbeacon.beaconreference;
+package org.altbeacon.WorkTracking;
 
 import android.app.Application;
-import android.app.Notification;
-import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
@@ -12,7 +10,6 @@ import android.content.SharedPreferences;
 
 import androidx.core.app.NotificationCompat;
 
-import android.os.Build;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -29,7 +26,7 @@ import org.altbeacon.beacon.powersave.BackgroundPowerSaver;
 import org.altbeacon.beacon.startup.RegionBootstrap;
 import org.altbeacon.beacon.startup.BootstrapNotifier;
 import org.altbeacon.bluetooth.BluetoothMedic;
-import org.altbeacon.network.LocationTimeStamp;
+import org.altbeacon.objects.LocationTimeStamp;
 import org.threeten.bp.LocalTime;
 import org.threeten.bp.ZoneId;
 
@@ -42,7 +39,7 @@ import java.util.*;
 
 /**
  */
-public class BeaconReferenceApplication extends Application implements BootstrapNotifier, BeaconConsumer{
+public class MainApplication extends Application implements BootstrapNotifier, BeaconConsumer{
     private static final String TAG = "BeaconReferenceApp";
     private RegionBootstrap regionBootstrap;
     private BackgroundPowerSaver backgroundPowerSaver;
@@ -55,6 +52,7 @@ public class BeaconReferenceApplication extends Application implements Bootstrap
     private Long tsInRegion, tsOutRegion = null;
     private String closestLocation = null;
     private String previousClosestLocation = null;
+    private String setLocation = null;
     private double closestBeaconDist = 100;
     BeaconManager beaconManager;
     private Identifier myBeaconNamespaceId = Identifier.parse("0x00112233445566778898");
@@ -248,8 +246,21 @@ public class BeaconReferenceApplication extends Application implements Bootstrap
                     long currentTime = tsInRegion;
                     //display timespent and current time
                     previousClosestLocation = closestLocation;
-                    appendToList(previousClosestLocation, currentTime, timeSpent);
-                    updateFragment();
+
+                    if (setLocation == null) {
+                        appendToList(previousClosestLocation, currentTime, timeSpent);
+                        updateFragment();
+                    }
+                    else{
+                        appendToList(setLocation, currentTime, timeSpent);
+                        updateFragment();
+                    }
+                    /*
+                    String displayCurrentTime = getDateCurrentTimeZone(currentTime);
+                    Log.i("Current Time", displayCurrentTime);
+                    updateCurrentLocationLTS("Pending Closest Beacon", displayCurrentTime);
+                    updateCurrentLocationMaps("Pending Closest Beacon", displayCurrentTime);
+                    */
                 }
             }
         }
@@ -263,16 +274,19 @@ public class BeaconReferenceApplication extends Application implements Bootstrap
             //if 9-6
             LocalTime now = LocalTime.now(ZoneId.systemDefault());
             if (isBetweenWorkHours((now))) {
-
                 if (previousClosestLocation == null) {
                     //For starting in outside location
                     tsOutRegion = System.currentTimeMillis();
+                    String displayCurrentTime = getDateCurrentTimeZone(tsInRegion);
                     closestLocation = "Outside";
+                    updateCurrentLocationLTS(closestLocation, displayCurrentTime);
+                    updateCurrentLocationMaps(closestLocation, displayCurrentTime);
                     //For moving from inside to outside
                 }else if (tsInRegion != null && previousClosestLocation != null && closestLocation != "Outside") {
                     tsOutRegion = System.currentTimeMillis();
                     long timeSpent = tsOutRegion - tsInRegion;
                     long currentTime = tsOutRegion;
+                    Log.i(TAG, "Duration: " + timeSpent + "\nCurrent Time: " + currentTime);
                     //convert current time to date
                     String displayCurrentTime = getDateCurrentTimeZone(currentTime);
                     //display timespent and current time
@@ -474,6 +488,8 @@ public class BeaconReferenceApplication extends Application implements Bootstrap
                             beaconList = new LinkedHashMap<String, Beacon>();
                         }
                         SharedPreferences sharedPreferences = getSharedPreferences("myBeacons", 0);
+
+                        //Determine which beacon in range is the closest
                         for (Beacon beacon : beacons) {
                             putListOfBeacons(beacon);
                             Log.i(TAG, "Beacon instance is: "+beacon.getId2().toString());
@@ -517,7 +533,16 @@ public class BeaconReferenceApplication extends Application implements Bootstrap
                                     tsInRegion = currentTime;
                                     previousClosestLocation = closestLocation;
                                 }
-                                // This logic is used the first time a beacon is detected upon entering the region
+                                else if(previousClosestLocation == "Outside"){
+                                    long currentTime = tsInRegion;
+                                    String displayCurrentTime = getDateCurrentTimeZone(currentTime);
+                                    Log.i("Current Time", displayCurrentTime);
+                                    updateCurrentLocationLTS(closestLocation, displayCurrentTime);
+                                    updateCurrentLocationMaps(closestLocation, displayCurrentTime);
+                                    Log.i(TAG, "The current location is " + closestLocation);
+                                    previousClosestLocation = closestLocation;
+                                }
+                                // This logic is used the first time a beacon is detected
                                 // i.e The location starts within range of a beacon
                                 else {
                                     tsInRegion = System.currentTimeMillis();
@@ -558,7 +583,9 @@ public class BeaconReferenceApplication extends Application implements Bootstrap
         }
     }
 
-
+    public void setLocation(String setLocation){
+        this.setLocation = setLocation;
     }
+}
 
 

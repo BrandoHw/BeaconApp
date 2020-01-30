@@ -1,19 +1,12 @@
-package org.altbeacon.beaconreference;
+package org.altbeacon.WorkTracking;
 
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
-import android.text.Spannable;
-import android.text.SpannableString;
-import android.text.style.ImageSpan;
 import android.util.Log;
 
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentStatePagerAdapter;
-
-import org.altbeacon.InternalMap.InternalMapFragment;
 
 import java.util.ArrayList;
 import java.util.List;

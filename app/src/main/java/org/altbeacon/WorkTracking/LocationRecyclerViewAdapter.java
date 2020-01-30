@@ -1,6 +1,5 @@
-package org.altbeacon.beaconreference;
+package org.altbeacon.WorkTracking;
 
-import android.location.Location;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,9 +9,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.volley.toolbox.NetworkImageView;
-
-import org.altbeacon.network.LocationTimeStamp;
+import org.altbeacon.objects.LocationTimeStamp;
 
 import java.util.ArrayList;
 

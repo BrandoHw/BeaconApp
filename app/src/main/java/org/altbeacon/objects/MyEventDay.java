@@ -1,4 +1,4 @@
-package org.altbeacon.network;
+package org.altbeacon.objects;
 
 import android.os.Parcel;
 import android.os.Parcelable;

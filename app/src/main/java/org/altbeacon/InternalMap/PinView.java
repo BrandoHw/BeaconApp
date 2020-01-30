@@ -26,7 +26,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import org.altbeacon.beaconreference.R;
+import org.altbeacon.WorkTracking.R;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -150,8 +150,6 @@ public class PinView extends SubsamplingScaleImageView implements onPinClickList
                         }
                     }
                     listDialog(tappedCoordinate);
-                    saveData();
-                    invalidate();
                 }
                 return true;
             }
@@ -199,13 +197,15 @@ public class PinView extends SubsamplingScaleImageView implements onPinClickList
                 SharedPreferences.Editor editor = spPinnedBeacons.edit();
                 editor.remove(categoryPoint.getUid());
                 editor.commit();
-                for (CategoryPoint cP:categoryPoints){
-                    if (cP.equals(categoryPoint)){
-                        categoryPoints.remove(categoryPoint);
+                for (CategoryPoint cP:categoryPoints) {
+                    if (cP.getUid().equals(categoryPoint.getUid())) {
+                        categoryPoints.remove(cP);
                         saveData();
                         loadData();
                         invalidate();
+                        break;
                     }
+
                 }
             }
 
@@ -221,11 +221,15 @@ public class PinView extends SubsamplingScaleImageView implements onPinClickList
     public void addPin(PointF tappedCoordinate, String location, String uid) {
         CategoryPoint newPin = new CategoryPoint(location, uid, 0, tappedCoordinate);
         for (CategoryPoint categoryPoint : categoryPoints) {
-            if (categoryPoint.getPointF() == newPin.getPointF())
+            if (categoryPoint.getPointF() == newPin.getPointF()) {
+                Log.i("GSON", "Duplicate Pin");
                 newPin = null;
+            }
         }
-        if (newPin != null)
+        if (newPin != null) {
+            Log.i("GSON", "Pin Added");
             categoryPoints.add(newPin);
+        }
     }
 
     private void saveData() {
@@ -233,10 +237,8 @@ public class PinView extends SubsamplingScaleImageView implements onPinClickList
         SharedPreferences.Editor editor = sp.edit();
         Gson gson = new Gson();
         String json = gson.toJson(categoryPoints);
+        Log.i("GSONS", json);
         editor.putString("pinsList", json);
-        editor.clear();
-
-        //
         editor.commit();
     }
 
@@ -245,7 +247,7 @@ public class PinView extends SubsamplingScaleImageView implements onPinClickList
         Gson gson = new Gson();
         String json = sp.getString("pinsList", null);
         if (json != null) {
-            Log.i("GSON", json);
+            Log.i("GSONL", json);
             Type type = new TypeToken<ArrayList<CategoryPoint>>() {
             }.getType();
             categoryPoints = gson.fromJson(json, type);
@@ -316,6 +318,8 @@ public class PinView extends SubsamplingScaleImageView implements onPinClickList
                         editor.putString(strKey, strName);
                         editor.commit();
                         addPin(viewToSourceCoord(tappedCoordinate), strName, strKey);
+                        saveData();
+                        invalidate();
                     }
                 });
                 builderInner.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {

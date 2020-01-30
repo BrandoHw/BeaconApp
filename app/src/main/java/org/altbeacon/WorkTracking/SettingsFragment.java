@@ -1,18 +1,11 @@
-package org.altbeacon.beaconreference;
+package org.altbeacon.WorkTracking;
 
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.ViewDebug;
-import android.widget.TimePicker;
 
-import android.content.SharedPreferences;
-import androidx.fragment.app.Fragment;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 

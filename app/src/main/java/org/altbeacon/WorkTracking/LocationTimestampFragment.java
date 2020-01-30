@@ -1,36 +1,24 @@
-package org.altbeacon.beaconreference;
+package org.altbeacon.WorkTracking;
 
 import androidx.fragment.app.Fragment;
 
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
-import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import org.altbeacon.beacon.Beacon;
-import org.altbeacon.network.LocationTimeStamp;
-import org.altbeacon.beaconreference.BeaconReferenceApplication;
-
-import java.util.ArrayList;
 
 
 public class LocationTimestampFragment extends Fragment {
     public static final String ARG_PAGE = "ARG_PAGE";
     private static final String TAG = "LocationTimeStampFrag";
     LocationRecyclerViewAdapter adapter;
-    //BeaconReferenceApplication application;
+    //MainApplication application;
 
     TextView currentLocationId;
     TextView currentTimestampId;
@@ -52,7 +40,7 @@ public class LocationTimestampFragment extends Fragment {
     public View onCreateView(
             @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.d(TAG, "onCreateView running");
-        BeaconReferenceApplication application = ((BeaconReferenceApplication) getActivity().getApplicationContext());
+        MainApplication application = ((MainApplication) getActivity().getApplicationContext());
         // Inflate the layout for this fragment with the ProductGrid theme
         View view = inflater.inflate(R.layout.location_timestamp_fragment, container, false);
 
@@ -83,7 +71,7 @@ public class LocationTimestampFragment extends Fragment {
 
 
     public void updateAdapter(){
-        BeaconReferenceApplication application = ((BeaconReferenceApplication) getActivity().getApplicationContext());
+        MainApplication application = ((MainApplication) getActivity().getApplicationContext());
         Log.i(TAG, "Attempting adapter update");
         if (application.locationList() != null) {
             Log.i(TAG, "Successful adapter update");

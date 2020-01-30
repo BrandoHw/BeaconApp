@@ -1,10 +1,8 @@
 package org.altbeacon.InternalMap;
 
 import android.graphics.Bitmap;
-import android.graphics.PointF;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,15 +12,11 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.davemorrissey.labs.subscaleview.ImageSource;
-import com.google.android.gms.maps.MapFragment;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import org.altbeacon.InternalMap.CategoryPoint;
-import org.altbeacon.InternalMap.PinView;
-import org.altbeacon.beaconreference.MapsFragment;
-import org.altbeacon.beaconreference.MonitoringActivity;
-import org.altbeacon.beaconreference.R;
-import org.altbeacon.beaconreference.TabPagerAdapter;
+import org.altbeacon.WorkTracking.MapsFragment;
+import org.altbeacon.WorkTracking.MonitoringActivity;
+import org.altbeacon.WorkTracking.R;
 
 import java.util.ArrayList;
 import java.util.List;

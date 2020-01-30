@@ -37,7 +37,7 @@
                 android:id="@+id/delay_dbm"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="100ms <-> 41 dBm"
+                android:text="100ms - 41 dBm"
                 android:textAppearance="?attr/textAppearanceHeadline5"
                 android:gravity="right"
                 app:layout_constraintRight_toRightOf="parent" />

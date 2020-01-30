@@ -1,4 +1,4 @@
-package org.altbeacon.beaconreference;
+package org.altbeacon.WorkTracking;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -6,8 +6,6 @@ import androidx.appcompat.widget.Toolbar;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.util.Log;
 import android.view.View;
 
@@ -18,11 +16,10 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import org.altbeacon.network.MyEventDay;
+import org.altbeacon.objects.MyEventDay;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 public class CalendarActivity extends AppCompatActivity {

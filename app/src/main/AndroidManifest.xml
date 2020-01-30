@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="org.altbeacon.beaconreference"
+    package="org.altbeacon.WorkTracking"
     android:versionCode="1"
     android:versionName="1.0">
 
@@ -12,40 +12,40 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
-        android:name=".BeaconReferenceApplication"
+        android:name="org.altbeacon.WorkTracking.MainApplication"
         android:allowBackup="true"
         android:icon="@mipmap/mmdt_logo_launcher"
         android:label="@string/app_name"
         android:theme="@style/WorkTrack">
         <activity android:name="org.altbeacon.InternalMap.ViewPinActivity"></activity>
-        <activity android:name=".AddNoteActivity" />
-        <activity android:name=".CalendarActivity">
+        <activity android:name="org.altbeacon.WorkTracking.AddNoteActivity" />
+        <activity android:name="org.altbeacon.WorkTracking.CalendarActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.altbeacon.beaconreference.MonitoringActivity" />
+                android:value="org.altbeacon.WorkTracking.MonitoringActivity" />
         </activity>
         <activity
-            android:name=".ProfileActivity"
+            android:name="org.altbeacon.WorkTracking.ProfileActivity"
             android:label="@string/title_activity_profile"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.altbeacon.beaconreference.MonitoringActivity" />
+                android:value="org.altbeacon.WorkTracking.MonitoringActivity" />
         </activity>
-        <activity android:name=".TimePickerActivity">
+        <activity android:name="org.altbeacon.WorkTracking.TimePickerActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.altbeacon.beaconreference.MonitoringActivity" />
+                android:value="org.altbeacon.WorkTracking.MonitoringActivity" />
         </activity>
         <activity
-            android:name=".BeaconSettingActivity"
+            android:name="org.altbeacon.WorkTracking.BeaconSettingActivity"
             android:label="@string/title_activity_beacon_setting"
             android:theme="@style/WorkTrack.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.altbeacon.beaconreference.MonitoringActivity" />
+                android:value="org.altbeacon.WorkTracking.MonitoringActivity" />
         </activity>
-        <activity android:name=".MainActivity">
+        <activity android:name="org.altbeacon.WorkTracking.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -53,10 +53,10 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MonitoringActivity"
+            android:name="org.altbeacon.WorkTracking.MonitoringActivity"
             android:label="@string/app_name" />
         <activity
-            android:name=".RangingActivity"
+            android:name="org.altbeacon.WorkTracking.RangingActivity"
             android:label="@string/app_name" /> <!-- uncomment the following to enable scanning for over 30 minutes on Android 7+ -->
         <service
             android:name="org.altbeacon.beacon.service.BeaconService"
@@ -70,7 +70,7 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyCLjYBUTH7lYPKauWfItO5fWhTqRw6lGGM" />
 
-        <receiver android:name=".AlarmReceiver">
+        <receiver android:name="org.altbeacon.WorkTracking.AlarmReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
