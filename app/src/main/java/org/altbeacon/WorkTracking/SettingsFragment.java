@@ -1,6 +1,7 @@
 package org.altbeacon.WorkTracking;
 
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -8,6 +9,9 @@ import android.util.Log;
 
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.PreferenceManager;
+
+import org.threeten.bp.LocalTime;
 
 public class SettingsFragment extends PreferenceFragmentCompat{
     public static final String ARG_PAGE = "ARG_PAGE";
@@ -30,7 +34,7 @@ public class SettingsFragment extends PreferenceFragmentCompat{
         eHours = sp.getInt("eHours", 18);
         eMinutes = sp.getInt("eMinutes", 0);
         setPreferenceTime(eHours, eMinutes, myPref2);
-
+        setAlarm();
 
         myPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
@@ -94,6 +98,20 @@ public class SettingsFragment extends PreferenceFragmentCompat{
         eHours = sp.getInt("eHours", 18);
         eMinutes = sp.getInt("eMinutes", 0);
         setPreferenceTime(eHours, eMinutes, myPref2);
-        Log.i("Alarmo", mHours + " " + mMinutes + " " + eHours + " " + eMinutes);
+        Log.i("Alarm", mHours + " " + mMinutes + " " + eHours + " " + eMinutes);
+        setAlarm();
+    }
+
+    public void setAlarm(){
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        MainApplication application = (MainApplication) getActivity().getApplicationContext();
+        if (preferences.getBoolean("alarmEnable", true)){
+            if (application.isBetweenWorkHours(LocalTime.now()))
+                application.setAlarm(false);
+            else
+                application.setAlarm(true);
+        }
+        else
+            application.cancelAlarm();
     }
 }

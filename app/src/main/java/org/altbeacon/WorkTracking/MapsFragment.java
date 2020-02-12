@@ -505,6 +505,9 @@ public class MapsFragment extends Fragment
     }
 
     public void updateCurrentLocation(String currentLocation, String timeStamp){
+        if (currentLocation == "END")
+            currentLocationId.setText("Shift has Ended");
+        else
         currentLocationId.setText("Current Location: " + currentLocation);
         currentTimestampId.setText("[" + timeStamp + "]");
     }

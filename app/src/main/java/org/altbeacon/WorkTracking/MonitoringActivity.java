@@ -110,10 +110,12 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
 
 		//Setup Nav Drawer
 		PrimaryDrawerItem item1 = new PrimaryDrawerItem().withIdentifier(1).withName("Home").withIcon(R.drawable.nav_ic_home_black_24dp);
-		SecondaryDrawerItem item2 = new SecondaryDrawerItem().withIdentifier(2).withName("My Profile").withIcon(R.drawable.nav_ic_person_outline_black_24dp);;
+		SecondaryDrawerItem item2 = new SecondaryDrawerItem().withIdentifier(2).withName("My Profile").withIcon(R.drawable.nav_ic_person_outline_black_24dp);
+		;
 		SecondaryDrawerItem item3 = new SecondaryDrawerItem().withIdentifier(3).withName("Beacons").withIcon(R.drawable.nav_ic_bluetooth_searching_black_24dp);
 		SecondaryDrawerItem item4 = new SecondaryDrawerItem().withIdentifier(4).withName("Calendar").withIcon(R.drawable.nav_ic_calendar_today_24px);
-		SecondaryDrawerItem item5 = new SecondaryDrawerItem().withIdentifier(5).withName("Logout").withIcon(R.drawable.nav_ic_exit_to_app_black_24dp);;
+		SecondaryDrawerItem item5 = new SecondaryDrawerItem().withIdentifier(5).withName("Logout").withIcon(R.drawable.nav_ic_exit_to_app_black_24dp);
+		;
 
 		// Create the AccountHeader for the Nav Drawer
 		sharedpreferences = getSharedPreferences("myProfile", 0);
@@ -269,47 +271,9 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
 		}
 
 		//Setup Alarm Manager and broadcaster to wake beacon up and sleep beacon services at specified times
-		alarmMgr = (AlarmManager)this.getSystemService(Context.ALARM_SERVICE);
-		Intent intent = new Intent(this, AlarmReceiver.class);
-		alarmIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
-		Intent intent2 = new Intent(this, AlarmReceiver.class);
-		alarmIntent2 = PendingIntent.getBroadcast(this, 0, intent2, 0);
-
-		Calendar scheduleCalendar = Calendar.getInstance();
-		scheduleCalendar.setTimeInMillis(System.currentTimeMillis());
-		Calendar scheduleCalendar2 = Calendar.getInstance();
-		scheduleCalendar2.setTimeInMillis(System.currentTimeMillis());
-
-		SharedPreferences sharedPreferences = getSharedPreferences("myShift", 0);
-		if (sharedPreferences.contains("mHours")) {
-			mHours = sharedPreferences.getInt("mHours", 9);
-			//Log.i(TAG, "Set Time: " + Integer.toString(mHours));
-		}
-		if (sharedPreferences.contains("mMinutes")) {
-			mMinutes = sharedPreferences.getInt("mMinutes", 0);
-			//Log.i(TAG, "Set Time: " + Integer.toString(mMinutes));
-		}
-		if (sharedPreferences.contains("eHours")) {
-			eHours = sharedPreferences.getInt("eHours", 18);
-			//Log.i(TAG, "Set Time: " + Integer.toString(eHours));
-		}
-		if (sharedPreferences.contains("eMinutes")) {
-			eMinutes = sharedPreferences.getInt("eMinutes", 0);
-			//Log.i(TAG, "Set Time: "+ Integer.toString(eMinutes));
-		}
-
-		scheduleCalendar.set(Calendar.HOUR_OF_DAY, mMinutes);
-		scheduleCalendar.set(Calendar.MINUTE, mHours);
-		scheduleCalendar2.set(Calendar.HOUR_OF_DAY, eMinutes);
-		scheduleCalendar2.set(Calendar.MINUTE, eHours);
-
-		alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, scheduleCalendar.getTimeInMillis(),
-				AlarmManager.INTERVAL_DAY, alarmIntent);
-		alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, scheduleCalendar2.getTimeInMillis(),
-				AlarmManager.INTERVAL_DAY, alarmIntent2);
+		//setAlarm();
 
 	}
-
 
 
 	@Override
@@ -481,4 +445,45 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
 	}
 
 
+	public void setAlarm() {
+			alarmMgr = (AlarmManager)this.getSystemService(Context.ALARM_SERVICE);
+			Intent intent = new Intent(this, AlarmReceiver.class);
+			alarmIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
+			Intent intent2 = new Intent(this, AlarmReceiver.class);
+			alarmIntent2 = PendingIntent.getBroadcast(this, 0, intent2, 0);
+
+			Calendar scheduleCalendar = Calendar.getInstance();
+			scheduleCalendar.setTimeInMillis(System.currentTimeMillis());
+			Calendar scheduleCalendar2 = Calendar.getInstance();
+			scheduleCalendar2.setTimeInMillis(System.currentTimeMillis());
+
+			SharedPreferences sharedPreferences = getSharedPreferences("myShift", 0);
+			if (sharedPreferences.contains("mHours")) {
+				mHours = sharedPreferences.getInt("mHours", 9);
+				//Log.i(TAG, "Set Time: " + Integer.toString(mHours));
+			}
+			if (sharedPreferences.contains("mMinutes")) {
+				mMinutes = sharedPreferences.getInt("mMinutes", 0);
+				//Log.i(TAG, "Set Time: " + Integer.toString(mMinutes));
+			}
+			if (sharedPreferences.contains("eHours")) {
+				eHours = sharedPreferences.getInt("eHours", 18);
+				//Log.i(TAG, "Set Time: " + Integer.toString(eHours));
+			}
+			if (sharedPreferences.contains("eMinutes")) {
+				eMinutes = sharedPreferences.getInt("eMinutes", 0);
+				//Log.i(TAG, "Set Time: "+ Integer.toString(eMinutes));
+			}
+
+			scheduleCalendar.set(Calendar.HOUR_OF_DAY, mMinutes);
+			scheduleCalendar.set(Calendar.MINUTE, mHours);
+			scheduleCalendar2.set(Calendar.HOUR_OF_DAY, eMinutes);
+			scheduleCalendar2.set(Calendar.MINUTE, eHours);
+
+			alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, scheduleCalendar.getTimeInMillis(),
+					AlarmManager.INTERVAL_DAY, alarmIntent);
+			alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, scheduleCalendar2.getTimeInMillis(),
+					AlarmManager.INTERVAL_DAY, alarmIntent2);
+			Log.i("Alarm", "Alarm Set");
+	}
 }

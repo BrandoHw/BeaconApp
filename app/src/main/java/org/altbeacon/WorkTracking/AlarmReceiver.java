@@ -12,20 +12,28 @@ public class AlarmReceiver extends BroadcastReceiver {
     private static final String TAG = "AlarmReceiver";
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.i(TAG, "Alarm Manager is WORKING");
+        Log.i(TAG, "Alarm Manager is working");
         LocalTime now = LocalTime.now(ZoneId.systemDefault());
         MainApplication application = ((MainApplication) context.getApplicationContext());
         if (application.isBetweenWorkHours(now)) {
+            Log.i(TAG, "Monitoring Enabled");
+            //Initialize the application
             application.enableMonitoring();
         } else {
             application.disableMonitoring();
             long latestTime = application.latestTimeStamp();
             long currentTime = System.currentTimeMillis();
             long duration = currentTime - latestTime;
-            String displayTimeSpent = application.getDurationBreakdown(duration);
+            String lastLocation = application.lastLocation();
             String displayCurrentTime = application.getDateCurrentTimeZone(currentTime);
-            application.logToDisplay("[" + displayCurrentTime + "] Employee ended their shift at: "
-                    + application.lastLocation() + " Duration: " + displayTimeSpent);
+            application.appendToList(lastLocation, currentTime, duration);
+            application.updateFragment();
+            application.setClosestLocationEnd();
+            application.updateCurrentLocationLTS("END", displayCurrentTime);
+            application.updateCurrentLocationLTS("END", displayCurrentTime);
+            Log.i(TAG, Long.toString(latestTime));
+            Log.i(TAG, "Monitoring Disabled");
+            application.setAlarm(true);
         }
     }
 }

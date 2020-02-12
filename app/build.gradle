@@ -78,6 +78,9 @@ dependencies {
 
     //Subsampling-scale-image-view
     implementation 'com.davemorrissey.labs:subsampling-scale-image-view:3.10.0'
+
+    //Cloudant Sync
+    implementation 'com.cloudant:cloudant-sync-datastore-android:latest.release'
 }
 
 apply plugin: 'com.google.gms.google-services'

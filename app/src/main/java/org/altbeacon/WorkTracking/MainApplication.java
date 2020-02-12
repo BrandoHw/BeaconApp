@@ -1,5 +1,6 @@
 package org.altbeacon.WorkTracking;
 
+import android.app.AlarmManager;
 import android.app.Application;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -9,12 +10,14 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 
 import androidx.core.app.NotificationCompat;
+import androidx.preference.PreferenceManager;
 
 import android.os.RemoteException;
 import android.util.Log;
 
 import com.jakewharton.threetenabp.AndroidThreeTen;
 
+import org.altbeacon.Network.DatabaseSync;
 import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconConsumer;
 import org.altbeacon.beacon.BeaconManager;
@@ -30,6 +33,7 @@ import org.altbeacon.objects.LocationTimeStamp;
 import org.threeten.bp.LocalTime;
 import org.threeten.bp.ZoneId;
 
+import java.net.URI;
 import java.util.Collection;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
@@ -41,6 +45,7 @@ import java.util.*;
  */
 public class MainApplication extends Application implements BootstrapNotifier, BeaconConsumer{
     private static final String TAG = "BeaconReferenceApp";
+    private static MainApplication mContext;
     private RegionBootstrap regionBootstrap;
     private BackgroundPowerSaver backgroundPowerSaver;
     private boolean haveDetectedBeaconsSinceBoot = false;
@@ -61,9 +66,15 @@ public class MainApplication extends Application implements BootstrapNotifier, B
     //LocationTimeStamp lts = new LocationTimeStamp("Testing", getDateCurrentTimeZone(100000), getDurationBreakdown(100000));
     private LinkedHashMap<String, Beacon> beaconList = new LinkedHashMap<String, Beacon>();
 
+    //Alarm Manager
+    private int mHours = 9, mMinutes = 0, eHours = 18, eMinutes = 0;
+    private AlarmManager alarmMgr;
+    private PendingIntent alarmIntent, alarmIntent2;
+
     @Override
     public void onCreate() {
         super.onCreate();
+        mContext = this;
         AndroidThreeTen.init(this);
         BeaconManager beaconManager = org.altbeacon.beacon.BeaconManager.getInstanceForApplication(this);
         // By default the AndroidBeaconLibrary will only find AltBeacons.  If you wish to make it
@@ -141,6 +152,22 @@ public class MainApplication extends Application implements BootstrapNotifier, B
         // If you wish to test beacon detection in the Android Emulator, you can use code like this:
         // BeaconManager.setBeaconSimulator(new TimedBeaconSimulator() );
         // ((TimedBeaconSimulator) BeaconManager.getBeaconSimulator()).createTimedSimulatedBeacons();
+
+        //Check if alarm is enabled, then set it
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        if (preferences.getBoolean("alarmEnable", true))
+            setAlarm(false);
+        else
+            cancelAlarm();
+
+        //Load in today's log from the local datastore into mLocationTimestamps
+        long currentTime = System.currentTimeMillis();
+        mlocationTimeStamps = DatabaseSync.getLogs(getDateOnly(currentTime));
+    }
+
+
+    public static MainApplication getContext(){
+        return mContext;
     }
 
 /*    public void scheduler() {
@@ -250,10 +277,16 @@ public class MainApplication extends Application implements BootstrapNotifier, B
                     if (setLocation == null) {
                         appendToList(previousClosestLocation, currentTime, timeSpent);
                         updateFragment();
+                        URI uri = DatabaseSync.getCredentials();
+                        if (uri != null)
+                            DatabaseSync.storeLogs(mlocationTimeStamps, uri, getDateOnly(currentTime));
                     }
                     else{
                         appendToList(setLocation, currentTime, timeSpent);
                         updateFragment();
+                        URI uri = DatabaseSync.getCredentials();
+                        if (uri != null)
+                            DatabaseSync.storeLogs(mlocationTimeStamps, uri, getDateOnly(currentTime));
                     }
                     /*
                     String displayCurrentTime = getDateCurrentTimeZone(currentTime);
@@ -277,7 +310,7 @@ public class MainApplication extends Application implements BootstrapNotifier, B
                 if (previousClosestLocation == null) {
                     //For starting in outside location
                     tsOutRegion = System.currentTimeMillis();
-                    String displayCurrentTime = getDateCurrentTimeZone(tsInRegion);
+                    String displayCurrentTime = getDateCurrentTimeZone(tsOutRegion);
                     closestLocation = "Outside";
                     updateCurrentLocationLTS(closestLocation, displayCurrentTime);
                     updateCurrentLocationMaps(closestLocation, displayCurrentTime);
@@ -294,6 +327,9 @@ public class MainApplication extends Application implements BootstrapNotifier, B
                     closestLocation = "Outside";
                     appendToList(previousClosestLocation, currentTime, timeSpent);
                     updateFragment();
+                    URI uri = DatabaseSync.getCredentials();
+                    if (uri != null)
+                        DatabaseSync.storeLogs(mlocationTimeStamps, uri, getDateOnly(currentTime));
                     updateCurrentLocationLTS(closestLocation, displayCurrentTime);
                     updateCurrentLocationMaps(closestLocation, displayCurrentTime);
                 }
@@ -368,10 +404,24 @@ public class MainApplication extends Application implements BootstrapNotifier, B
         try{
             Calendar calendar = Calendar.getInstance();
             TimeZone tz = TimeZone.getDefault();
-            Log.d("Time zone: ", tz.getDisplayName());
             calendar.setTimeInMillis(timestamp);
             //calendar.add(Calendar.MILLISECOND, tz.getOffset(calendar.getTimeInMillis()));
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Date currentTimeZone = (Date) calendar.getTime();
+            return sdf.format(currentTimeZone);
+        }catch (Exception e) {
+        }
+        return "";
+    }
+
+    public  String getDateOnly(long timestamp) {
+        try{
+            Calendar calendar = Calendar.getInstance();
+            TimeZone tz = TimeZone.getDefault();
+            Log.d("Time zone: ", tz.getDisplayName());
+            calendar.setTimeInMillis(timestamp);
+            //calendar.add(Calendar.MILLISECOND, tz.getOffset(calendar.getTimeInMillis()));
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             Date currentTimeZone = (Date) calendar.getTime();
             Log.d("Time: ", sdf.format(currentTimeZone));
             return sdf.format(currentTimeZone);
@@ -440,6 +490,9 @@ public class MainApplication extends Application implements BootstrapNotifier, B
         }
     }
 
+    public void setClosestLocationEnd(){
+        closestLocation = "END";
+    }
     public void updateCurrentLocationLTS(String currentLocation, String timestamp){
         Log.d(TAG, "updateCurrentLocationLTS called");
         if (monitoringActivity != null) {
@@ -528,6 +581,9 @@ public class MainApplication extends Application implements BootstrapNotifier, B
                                     Log.i(TAG, "Append should be called here");
                                     appendToList(previousClosestLocation, currentTime, timeSpent);
                                     updateFragment();
+                                    URI uri = DatabaseSync.getCredentials();
+                                    if (uri != null)
+                                        DatabaseSync.storeLogs(mlocationTimeStamps, uri, getDateOnly(currentTime));
                                     updateCurrentLocationLTS(closestLocation, displayCurrentTime);
                                     updateCurrentLocationMaps(closestLocation, displayCurrentTime);
                                     tsInRegion = currentTime;
@@ -586,6 +642,57 @@ public class MainApplication extends Application implements BootstrapNotifier, B
     public void setLocation(String setLocation){
         this.setLocation = setLocation;
     }
+
+
+    public void setAlarm(Boolean forTomorrow) {
+        alarmMgr = (AlarmManager)this.getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(this, AlarmReceiver.class);
+        alarmIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
+        Intent intent2 = new Intent(this, AlarmReceiver.class);
+        alarmIntent2 = PendingIntent.getBroadcast(this, 1, intent2, 0);
+
+
+        Calendar scheduleCalendar = Calendar.getInstance();
+        scheduleCalendar.setTimeInMillis(System.currentTimeMillis());
+        Calendar scheduleCalendar2 = Calendar.getInstance();
+        scheduleCalendar2.setTimeInMillis(System.currentTimeMillis());
+
+        SharedPreferences sharedPreferences = getSharedPreferences("myShift", 0);
+        mHours = sharedPreferences.getInt("mHours", 9);
+        mMinutes = sharedPreferences.getInt("mMinutes", 0);
+        eHours = sharedPreferences.getInt("eHours", 18);
+        eMinutes = sharedPreferences.getInt("eMinutes", 0);
+
+
+        scheduleCalendar.set(Calendar.HOUR_OF_DAY, mHours);
+        scheduleCalendar.set(Calendar.MINUTE, mMinutes);
+        scheduleCalendar2.set(Calendar.HOUR_OF_DAY, eHours);
+        scheduleCalendar2.set(Calendar.MINUTE, eMinutes);
+
+        if (forTomorrow) {
+            Log.i("Alarm", "Setting Alarm for tomorrow");
+            scheduleCalendar.add(Calendar.DAY_OF_YEAR, 1);
+            scheduleCalendar2.add(Calendar.DAY_OF_YEAR, 1);
+        }
+
+        alarmMgr.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, scheduleCalendar.getTimeInMillis(), alarmIntent);
+        alarmMgr.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, scheduleCalendar2.getTimeInMillis(), alarmIntent2);
+        Log.i("Alarm", "Alarm Set");
+    }
+
+    public void cancelAlarm() {
+        alarmMgr = (AlarmManager)this.getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(this, AlarmReceiver.class);
+        alarmIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
+        Intent intent2 = new Intent(this, AlarmReceiver.class);
+        alarmIntent2 = PendingIntent.getBroadcast(this, 1, intent2, 0);
+
+        alarmMgr.cancel(alarmIntent);
+        alarmMgr.cancel(alarmIntent2);
+        Log.i("Alarm", "Alarm Set");
+    }
+
+
 }
 
 
