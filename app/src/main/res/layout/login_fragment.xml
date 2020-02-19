@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/loginPageBackgroundColor"
-    tools:context=".LoginFragment">
+    tools:context="org.altbeacon.login.LoginFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -40,52 +40,6 @@
             android:textSize="16sp"
             />
 
-        <RelativeLayout
-            android:id="@+id/verify_layout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingLeft="24dp"
-            android:paddingRight="24dp"
-            android:visibility="gone">
-
-            <ImageView
-                android:id="@+id/verify_image"
-                android:layout_width="64dp"
-                android:layout_height="64dp"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="48dp"
-                android:layout_marginBottom="16dp"
-                app:srcCompat="@drawable/ic_email" />
-
-            <TextView
-                android:id="@+id/verify_header"
-                android:layout_height="wrap_content"
-                android:layout_width="match_parent"
-                android:text="Your email requires verification"
-                android:gravity="center"
-                android:textAppearance="?attr/textAppearanceHeadline4"
-                android:paddingBottom="24dp"
-                android:layout_below="@id/verify_image"/>
-
-            <TextView
-                android:id="@+id/verify_status"
-                android:layout_height="wrap_content"
-                android:layout_width="match_parent"
-                android:layout_below="@id/verify_header"
-                android:text="User Email: Brandon@mmdt.cc"
-                android:gravity="center"
-                android:textAppearance="?attr/textAppearanceBody1"/>
-
-            <TextView
-                android:id="@+id/verify_detail"
-                android:layout_height="wrap_content"
-                android:layout_width="match_parent"
-                android:layout_below="@id/verify_status"
-                android:gravity="center"
-                android:text="Your email has been registered, please verify your email to login"
-                />
-        </RelativeLayout>
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="150dp"
@@ -103,7 +57,6 @@
             android:paddingRight="24dp">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:text="Brandohw@gmail.com"
                 android:id="@+id/username_edit_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -124,7 +77,6 @@
             >
 
             <com.google.android.material.textfield.TextInputEditText
-                android:text="mmdt12345"
                 android:id="@+id/password_edit_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -161,39 +113,6 @@
                 android:layout_toStartOf="@id/login_button"
                 android:layout_toLeftOf="@id/login_button"
                 android:text="@string/mmdt_button_register"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Button"
-                />
-
-        </RelativeLayout>
-        <RelativeLayout
-            android:id="@+id/rl_buttons2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="gone">
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/verify_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
-                android:text="@string/mmdt_button_verify"
-                android:textColor="@color/white"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Button"
-                style="@style/Widget.WorkTrack.Button"
-                android:layout_marginEnd="24dp"
-                android:layout_marginRight="24dp"/>
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/cancel_button"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="12dp"
-                android:layout_marginRight="12dp"
-                android:layout_toStartOf="@id/verify_button"
-                android:layout_toLeftOf="@id/verify_button"
-                android:text="@string/mmdt_button_cancel"
-
                 android:textAppearance="@style/TextAppearance.MaterialComponents.Button"
                 />
 

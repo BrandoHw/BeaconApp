@@ -72,7 +72,44 @@
     <string name="profile_phonenumber">Phone number</string>
     <string name="profile_jobtitle">Job Title</string>
 
-    //Temporary Cloudant Api Key
-    <string name="employee_url">https://d5baacd4-5020-497c-a9f6-96098c8c698e-bluemix:bc1943e4f1d688d02c453da106ae400c833689fc5b9bc301e3b418ffbf6e2d90@d5baacd4-5020-497c-a9f6-96098c8c698e-bluemix.cloudantnosqldb.appdomain.cloud/employee-1</string>
-    <string name="beacons_url">https://d5baacd4-5020-497c-a9f6-96098c8c698e-bluemix:bc1943e4f1d688d02c453da106ae400c833689fc5b9bc301e3b418ffbf6e2d90@d5baacd4-5020-497c-a9f6-96098c8c698e-bluemix.cloudantnosqldb.appdomain.cloud/beacons-db</string>
+    //AppId Strings
+    <string name="hintText"><b>Hint:</b> Replace this screen with content that is available before a user is asked to login</string>
+    <string name="mainAppID">App <b>ID</b></string>
+    <string name="guest">Continue as guest</string>
+    <string name="login">Sign in</string>
+    <string name="choice">What would you like to eat?</string>
+    <string name="get_gifts">Login, earn points and get gifts!</string>
+    <string name="new_bonus_points">Thanks for joining! You just earned %1$s bonus points to get you started :)</string>
+    <string name="bonus_points">You have %1$s points, go get an ice cream!</string>
+    <string name="test_that_everything_is_working">Test that everything is working and customize the UI from the console.</string>
+    <string name="view_token">View Token</string>
+    <string name="greet">Hi</string>
+    <string name="notice">Note:</string>
+    <string name="description">Description</string>
+    <string name="selected_icon">selected icon</string>
+    <string name="welcome_to_your_working_app_id_sample">Welcome to your App ID sample app</string>
+    <string name="brand">Cloudland</string>
+    <string name="progressive_auth_notice">"A guest user logged-in for the first time.
+        App ID assigned this user’s identity to his anonymous profile, so his previous selections are saved. The anonymous token previously used to access this profile is now invalid."</string>
+    <string name="switch_to_identified_notice">"A user started to use the app anonymously, made some selections, and then logged in.
+        Since he had logged in in the past, the app switches over to his existing identified profile in place of his anonymous profile."</string>
+    <string name="logged_in_new_notice">"An identified user logged in for the first time. A new Profile was created on App ID.
+        Now when he logs in with the same credentials from any device or web client, the app will show his same profile and selections."</string>
+    <string name="logged_in_again_notice">"A known identified user logged in again. His Profile is fetched from App ID.</string>
+    <string name="new_guest_notice">"A guest user started using the app.
+        App ID created a new anonymous profile, where the user’s selections can be stored. Note that this anonymous profile is only available from this device."</string>
+    <string name="returning_guest_notice">"A guest user returned.
+The app uses his existing anonymous profile, so his previous selections are shown. Note that this anonymous user profile is only available from this device."</string>
+    <string name="login_back_notice">"An identified user returned to the app with the same identity.
+The app accesses his identified profile and the previous selections that he made."</string>
+    <string name="login_back_and_change_login_notice">"The user signed back into the device with a different identity (e.g. was with Facebook, now with Google). The profile related to the identity he currenlty logged in with is now shown."</string>
+    <string name="please_wait">Please Wait...</string>
+    <string name="profile_icon">Profile Icon</string>
+    <string name="account_details">Account Details</string>
+    <string name="change_password">Change Password</string>
+    <string name="log_out">Sign out</string>
+    <string name="facebook_app_id">YOUR_APP_ID_HERE</string>
+
+
+
 </resources>

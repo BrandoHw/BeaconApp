@@ -15,9 +15,12 @@ import androidx.preference.PreferenceManager;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.ibm.cloud.appid.android.api.AppID;
+import com.ibm.cloud.appid.android.api.AppIDAuthorizationManager;
 import com.jakewharton.threetenabp.AndroidThreeTen;
 
 import org.altbeacon.Network.DatabaseSync;
+import org.altbeacon.Network.ServerlessAPI;
 import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconConsumer;
 import org.altbeacon.beacon.BeaconManager;
@@ -29,6 +32,7 @@ import org.altbeacon.beacon.powersave.BackgroundPowerSaver;
 import org.altbeacon.beacon.startup.RegionBootstrap;
 import org.altbeacon.beacon.startup.BootstrapNotifier;
 import org.altbeacon.bluetooth.BluetoothMedic;
+import org.altbeacon.login.TokensPersistenceManager;
 import org.altbeacon.objects.LocationTimeStamp;
 import org.threeten.bp.LocalTime;
 import org.threeten.bp.ZoneId;
@@ -71,6 +75,10 @@ public class MainApplication extends Application implements BootstrapNotifier, B
     private AlarmManager alarmMgr;
     private PendingIntent alarmIntent, alarmIntent2;
 
+    //App ID
+    private AppID appID;
+    private AppIDAuthorizationManager appIDAuthorizationManager;
+    private TokensPersistenceManager tokensPersistenceManager;
     @Override
     public void onCreate() {
         super.onCreate();
@@ -163,6 +171,12 @@ public class MainApplication extends Application implements BootstrapNotifier, B
         //Load in today's log from the local datastore into mLocationTimestamps
         long currentTime = System.currentTimeMillis();
         mlocationTimeStamps = DatabaseSync.getLogs(getDateOnly(currentTime));
+
+        //Initialize AppID
+        appID = AppID.getInstance();
+        appID.initialize(this, getString(R.string.authTenantId), AppID.REGION_US_SOUTH);
+        appIDAuthorizationManager = new AppIDAuthorizationManager(appID);
+        tokensPersistenceManager = new TokensPersistenceManager(this, appIDAuthorizationManager);
     }
 
 
@@ -690,6 +704,31 @@ public class MainApplication extends Application implements BootstrapNotifier, B
         alarmMgr.cancel(alarmIntent);
         alarmMgr.cancel(alarmIntent2);
         Log.i("Alarm", "Alarm Set");
+    }
+
+    public void getCredentials(){
+        SharedPreferences sp = getSharedPreferences("myProfile", 0);
+        final String role = sp.getString("myRole", "Employee");
+        String username = sp.getString("profileName", "no_name_given");
+        final String name = username.replace(' ', '-');
+        new  org.altbeacon.Network.DoWithProgress(this){
+            @Override
+            protected Void doInBackground(Void... params) {
+                try {
+                    ServerlessAPI.getCredentials(appIDAuthorizationManager.getAccessToken(), name, role);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+                Log.i("Post-Execute", "Finished");
+            }
+        }.execute();
+
     }
 
 

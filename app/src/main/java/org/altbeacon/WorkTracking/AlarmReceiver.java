@@ -30,7 +30,7 @@ public class AlarmReceiver extends BroadcastReceiver {
             application.updateFragment();
             application.setClosestLocationEnd();
             application.updateCurrentLocationLTS("END", displayCurrentTime);
-            application.updateCurrentLocationLTS("END", displayCurrentTime);
+            application.updateCurrentLocationMaps("END", displayCurrentTime);
             Log.i(TAG, Long.toString(latestTime));
             Log.i(TAG, "Monitoring Disabled");
             application.setAlarm(true);

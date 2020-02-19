@@ -109,5 +109,4 @@ public class CalendarActivity extends AppCompatActivity {
         //Method to check and remove old event days from the list
     }
 
-
 }

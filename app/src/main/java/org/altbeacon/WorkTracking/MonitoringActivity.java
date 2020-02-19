@@ -22,18 +22,28 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.Calendar;
+import java.util.Map;
 
+import org.altbeacon.Network.ServerlessAPI;
 import org.altbeacon.beacon.BeaconConsumer;
 import org.altbeacon.beacon.BeaconManager;
 import org.altbeacon.beacon.BeaconParser;
 import org.altbeacon.beacon.Identifier;
 import org.altbeacon.beacon.Region;
+import org.altbeacon.login.TokensPersistenceManager;
+import org.json.JSONObject;
 
 
 //Materials Design
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.gson.Gson;
+import com.ibm.cloud.appid.android.api.AppID;
+import com.ibm.cloud.appid.android.api.AppIDAuthorizationManager;
+import com.ibm.cloud.appid.android.api.tokens.IdentityToken;
+import com.ibm.cloud.appid.android.api.userprofile.UserProfileException;
+import com.ibm.cloud.appid.android.api.userprofile.UserProfileResponseListener;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.Drawer;
@@ -86,9 +96,11 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
 	ProfileDrawerItem profile;
 	AccountHeader headerResult;
 
-	//Firebase
-	private FirebaseAuth.AuthStateListener mAuthListener;
-	private FirebaseAuth mAuth;
+	//App ID
+	private AppID appID;
+	private AppIDAuthorizationManager appIDAuthorizationManager;
+	private TokensPersistenceManager tokensPersistenceManager;
+
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -97,16 +109,30 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
 		setContentView(R.layout.activity_monitoring);
 		verifyBluetooth();
 
-//		if (savedInstanceState == null) {
-//			getSupportFragmentManager()
-//					.beginTransaction()
-//					.add(R.id.container, new org.altbeacon.beaconreference.LocationTimestampFragment(), "LTS_FRAGMENT")
-//					.commit();
-//		}
 		//Setup Toolbar
 		toolbar = (Toolbar) findViewById(R.id.app_bar);
 		setSupportActionBar(toolbar);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+		//Initialize AppID
+		appID = AppID.getInstance();
+		//appID.initialize(this, getString(R.string.authTenantId), AppID.REGION_US_SOUTH);
+		appIDAuthorizationManager = new AppIDAuthorizationManager(appID);
+		tokensPersistenceManager = new TokensPersistenceManager(this, appIDAuthorizationManager);
+		//ServerlessAPI.initialize(getResources().getString(R.string.backendURL));
+		IdentityToken idt = appIDAuthorizationManager.getIdentityToken();
+
+		//Getting information from identity token. This is information that is coming from the identity provider.
+		if (idt != null) {
+				String username = idt.getName();
+				String email = idt.getEmail();
+				sharedpreferences = getSharedPreferences("myProfile", 0);
+				SharedPreferences.Editor editor = sharedpreferences.edit();
+				editor.putString("profileName", username);
+				editor.putString("profileEmail", email);
+				editor.commit();
+		}
+
 
 		//Setup Nav Drawer
 		PrimaryDrawerItem item1 = new PrimaryDrawerItem().withIdentifier(1).withName("Home").withIcon(R.drawable.nav_ic_home_black_24dp);
@@ -189,22 +215,6 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
 		setupTabIcons();
 
 
-		//Firebase sign out observer
-		mAuthListener = new FirebaseAuth.AuthStateListener() {
-			@Override
-			public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-				FirebaseUser user = firebaseAuth.getCurrentUser();
-				if (user != null) {
-					// User is signed in
-					Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
-				} else {
-					// User is signed out
-					Log.d(TAG, "onAuthStateChanged:signed_out");
-				}
-				// ...
-			}
-		};
-
 		//Bind The beaconmanager,
 		beaconManager.bind(this);
 		beaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout(BeaconParser.EDDYSTONE_UID_LAYOUT));
@@ -270,9 +280,9 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
 			}
 		}
 
-		//Setup Alarm Manager and broadcaster to wake beacon up and sleep beacon services at specified times
-		//setAlarm();
-
+		//Retrieve the users info and set their permissions using their role as determined in AppId
+		saveRole();
+		requestAction();
 	}
 
 
@@ -485,5 +495,62 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
 			alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, scheduleCalendar2.getTimeInMillis(),
 					AlarmManager.INTERVAL_DAY, alarmIntent2);
 			Log.i("Alarm", "Alarm Set");
+	}
+
+
+	public void requestAction(){
+		new  org.altbeacon.Network.DoWithProgress(this){
+			String role = getRole();
+			@Override
+			protected Void doInBackground(Void... params) {
+				try {
+					ServerlessAPI.getCredentials(appIDAuthorizationManager.getAccessToken(), "READER", role);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				return null;
+			}
+
+			@Override
+			protected void onPostExecute(Void aVoid) {
+				super.onPostExecute(aVoid);
+				Log.i("Post-Execute", "Finished");
+			}
+		}.execute();
+
+	}
+
+	public void saveRole(){
+		appID.getUserProfileManager().getAllAttributes(new UserProfileResponseListener() {
+			@Override
+			public void onSuccess(JSONObject response) {
+				Map map = new Gson().fromJson(response.toString(), Map.class);
+				String role = map.get("role").toString();
+				Log.i("Role: ", role);
+				SharedPreferences sp = getSharedPreferences("myProfile", 0);
+				SharedPreferences.Editor editor = sp.edit();
+				editor.putString("myRole", role);
+				editor.commit();
+			}
+
+			@Override
+			public void onFailure(UserProfileException e) {
+				Log.i("Role: ", "Could not retrieve user info");
+				SharedPreferences sp = getSharedPreferences("myProfile", 0);
+				String role = sp.getString("myRole", "Employee");
+
+				if (role.equals("Manager")) {
+					SharedPreferences.Editor editor = sp.edit();
+					editor.putString("myRole", role);
+					editor.apply();
+				}
+			}
+		});
+	}
+
+	public String getRole(){
+		SharedPreferences sp = getSharedPreferences("myProfile", 0);
+		String role = sp.getString("myRole", "Employee");
+		return role;
 	}
 }

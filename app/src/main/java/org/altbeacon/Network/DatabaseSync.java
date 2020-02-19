@@ -1,6 +1,7 @@
 package org.altbeacon.Network;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.util.Log;
 import android.view.View;
@@ -32,6 +33,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * my_datastore: Storage of employees own personal logs
@@ -49,8 +52,17 @@ private static String TAG = "DatabaseSync";
             DocumentRevision retrieved = ds.database().read(docId);
             retrieved.setBody(DocumentBodyFactory.create(hashMap));
             ds.database().update(retrieved);
-            //URI uri = new URI(MainApplication.getContext().getString(R.string.url));
-            Replicator uploader = ReplicatorBuilder.push().from(ds).to(uri).build();
+            String string_uri = uri.toString();
+            Pattern pattern = Pattern.compile("//(.*?):");
+            Matcher matcher = pattern.matcher(string_uri);
+            String apiKey = matcher.group(1);
+
+            Replicator uploader = ReplicatorBuilder
+                    .push()
+                    .from(ds)
+                    .to(uri)
+                    .iamApiKey(apiKey)
+                    .build();
             CountDownLatch latch = new CountDownLatch(1);
             Listener listener = new Listener(latch);
             uploader.getEventBus().register(listener);
@@ -85,7 +97,17 @@ private static String TAG = "DatabaseSync";
             DocumentStore ds = DocumentStore.getInstance(new File(path, localdb));
             // Create a replicator that replicates changes from the remote
             // database to the local DocumentStore.
-            Replicator replicator = ReplicatorBuilder.pull().from(uri).to(ds).build();
+            String string_uri = uri.toString();
+            Pattern pattern = Pattern.compile("//(.*?):");
+            Matcher matcher = pattern.matcher(string_uri);
+            String apiKey = matcher.group(1);
+
+            Replicator replicator = ReplicatorBuilder
+                    .pull()
+                    .from(uri)
+                    .iamApiKey(apiKey)
+                    .to(ds)
+                    .build();
 
             // Use a CountDownLatch to provide a lightweight way to wait for completion
             CountDownLatch latch = new CountDownLatch(1);
@@ -171,7 +193,7 @@ private static String TAG = "DatabaseSync";
         }catch (DocumentNotFoundException de) {
             System.err.println("Document not found: " + de);
         }
-        return null;
+        return new ArrayList<LocationTimeStamp>();
     }
 
     public static URI getCredentials(){
@@ -184,6 +206,7 @@ private static String TAG = "DatabaseSync";
         }
         return uri;
     }
+
 
     public static void createDocument(HashMap<?, ?> hashMap, URI uri, String localdb, String docId){
         File path = MainApplication.getContext().getDir("DocumentStore", Context.MODE_PRIVATE);
@@ -218,8 +241,6 @@ private static String TAG = "DatabaseSync";
             System.err.println("Problem with latch: " + ie);
         }
     }
-
-
 
 
 }
