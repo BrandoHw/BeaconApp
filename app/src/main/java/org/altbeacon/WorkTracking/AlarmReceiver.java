@@ -17,7 +17,8 @@ public class AlarmReceiver extends BroadcastReceiver {
         MainApplication application = ((MainApplication) context.getApplicationContext());
         if (application.isBetweenWorkHours(now)) {
             Log.i(TAG, "Monitoring Enabled");
-            //Initialize the application
+            //Initialize the application for new work day
+            application.initNewday();
             application.enableMonitoring();
         } else {
             application.disableMonitoring();

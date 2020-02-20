@@ -16,6 +16,7 @@ import com.cloudant.sync.documentstore.DocumentStoreException;
 import com.cloudant.sync.event.Subscribe;
 import com.cloudant.sync.event.notifications.ReplicationCompleted;
 import com.cloudant.sync.event.notifications.ReplicationErrored;
+import com.cloudant.sync.replication.DatabaseNotFoundException;
 import com.cloudant.sync.replication.Replicator;
 import com.cloudant.sync.replication.ReplicatorBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -55,8 +56,11 @@ private static String TAG = "DatabaseSync";
             String string_uri = uri.toString();
             Pattern pattern = Pattern.compile("//(.*?):");
             Matcher matcher = pattern.matcher(string_uri);
-            String apiKey = matcher.group(1);
-
+            String apiKey = null;
+            if (matcher.find())
+                apiKey = matcher.group(1);
+            Log.i(TAG, "URI: " + uri);
+            Log.i(TAG, "apikey: "+ apiKey);
             Replicator uploader = ReplicatorBuilder
                     .push()
                     .from(ds)
@@ -72,6 +76,12 @@ private static String TAG = "DatabaseSync";
             if (uploader.getState() != Replicator.State.COMPLETE) {
                 System.err.println("Error replicating TO remote");
                 System.err.println(listener.errors);
+                for (Throwable throwable : listener.errors) {
+                    if (throwable instanceof DatabaseNotFoundException)
+                        Log.i("Database", "CatchSuccess");
+                    MainApplication application = ((MainApplication) MainApplication.getContext());
+                    application.createDatabase();
+                }
             } else {
                 System.out.println(String.format("Replicated %d documents in %d batches",
                         listener.documentsReplicated, listener.batchesReplicated));
@@ -91,6 +101,9 @@ private static String TAG = "DatabaseSync";
         }
     }
 
+
+
+
     public static DocumentStore pull(URI uri, String localdb){
         File path = MainApplication.getContext().getDir("DocumentStore", Context.MODE_PRIVATE);
         try {
@@ -100,8 +113,11 @@ private static String TAG = "DatabaseSync";
             String string_uri = uri.toString();
             Pattern pattern = Pattern.compile("//(.*?):");
             Matcher matcher = pattern.matcher(string_uri);
-            String apiKey = matcher.group(1);
-
+            String apiKey = null;
+            if (matcher.find())
+                apiKey = matcher.group(1);
+            Log.i(TAG, "URI: " + uri);
+            Log.i(TAG, "apikey: "+ apiKey);
             Replicator replicator = ReplicatorBuilder
                     .pull()
                     .from(uri)
@@ -194,17 +210,6 @@ private static String TAG = "DatabaseSync";
             System.err.println("Document not found: " + de);
         }
         return new ArrayList<LocationTimeStamp>();
-    }
-
-    public static URI getCredentials(){
-        URI uri;
-        try {
-            uri = new URI(MainApplication.getContext().getString(R.string.employee_url));
-        }catch (URISyntaxException ue){
-            System.err.println("Problem with URI syntax: "+ ue);
-            return null;
-        }
-        return uri;
     }
 
 

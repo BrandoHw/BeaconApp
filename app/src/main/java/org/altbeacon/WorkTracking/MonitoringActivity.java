@@ -134,6 +134,8 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
 		}
 
 
+
+
 		//Setup Nav Drawer
 		PrimaryDrawerItem item1 = new PrimaryDrawerItem().withIdentifier(1).withName("Home").withIcon(R.drawable.nav_ic_home_black_24dp);
 		SecondaryDrawerItem item2 = new SecondaryDrawerItem().withIdentifier(2).withName("My Profile").withIcon(R.drawable.nav_ic_person_outline_black_24dp);
@@ -147,6 +149,9 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
 		sharedpreferences = getSharedPreferences("myProfile", 0);
 		String navDrawHeaderName = sharedpreferences.getString("profileName", "Set your name in your profile page");
 		String navDrawHeaderEmail = sharedpreferences.getString("profileEmail", "Set your email in your profile page");
+
+		MainApplication application = ((MainApplication) this.getApplicationContext());
+		application.createDatabase();
 
 		profile = new ProfileDrawerItem().withName(navDrawHeaderName).withEmail(navDrawHeaderEmail)
 				.withIcon(getResources().getDrawable(R.drawable.employee));
@@ -282,7 +287,6 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
 
 		//Retrieve the users info and set their permissions using their role as determined in AppId
 		saveRole();
-		requestAction();
 	}
 
 
@@ -497,29 +501,6 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
 			Log.i("Alarm", "Alarm Set");
 	}
 
-
-	public void requestAction(){
-		new  org.altbeacon.Network.DoWithProgress(this){
-			String role = getRole();
-			@Override
-			protected Void doInBackground(Void... params) {
-				try {
-					ServerlessAPI.getCredentials(appIDAuthorizationManager.getAccessToken(), "READER", role);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				return null;
-			}
-
-			@Override
-			protected void onPostExecute(Void aVoid) {
-				super.onPostExecute(aVoid);
-				Log.i("Post-Execute", "Finished");
-			}
-		}.execute();
-
-	}
-
 	public void saveRole(){
 		appID.getUserProfileManager().getAllAttributes(new UserProfileResponseListener() {
 			@Override
@@ -548,9 +529,4 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
 		});
 	}
 
-	public String getRole(){
-		SharedPreferences sp = getSharedPreferences("myProfile", 0);
-		String role = sp.getString("myRole", "Employee");
-		return role;
-	}
 }

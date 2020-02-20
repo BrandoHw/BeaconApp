@@ -14,6 +14,8 @@ import org.altbeacon.WorkTracking.R;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -51,15 +53,21 @@ public class ServerlessAPI {
       .post(body)
       .build();
     Response response = client.newCall(request).execute();
-    Log.i(ServerlessAPI.class.getName(), " Received Credentials: " + response.body().string());
-    return new URI(response.body().string());
+    String uri = response.body().string();
+    Log.i(ServerlessAPI.class.getName(), " Received Credentials: " + uri);
+    Pattern pattern = Pattern.compile(": \"(.*?)\"");
+    Matcher matcher = pattern.matcher(uri);
+    if (matcher.find())
+      uri = matcher.group(1);
+    Log.i("getCredentials", uri);
+    return new URI(uri);
   }
 
 
   /**
    * Requests the web service to create a database in the cloud
    */
-  public void createDatabase(AccessToken accessToken, String db_name) throws Exception {
+  public static void createDatabase(AccessToken accessToken, String db_name) throws Exception {
     Log.i(ServerlessAPI.class.getName(), "Create database: " + db_name);
     Map<String, Object> database_name = new HashMap<String, Object>();
     database_name.put("dbname", db_name);
@@ -70,6 +78,10 @@ public class ServerlessAPI {
             .post(body)
             .build();
     Response response = client.newCall(request).execute();
-    Log.i(ServerlessAPI.class.getName(), "Feedback sent: " + response.body().string());
+    //Log.i(ServerlessAPI.class.getName(), "Response sent: " + response.body().string());
+    if (response.body().string().equals("\"ok\": true)")){
+      //SharedPreferences sp
+      Log.i("Database", "set cdb flag 1");
+    }
   }
 }

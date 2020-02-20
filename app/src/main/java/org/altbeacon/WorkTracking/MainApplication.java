@@ -12,6 +12,7 @@ import android.content.SharedPreferences;
 import androidx.core.app.NotificationCompat;
 import androidx.preference.PreferenceManager;
 
+import android.os.AsyncTask;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -57,11 +58,11 @@ public class MainApplication extends Application implements BootstrapNotifier, B
     private BeaconSettingActivity beaconSettingActivity = null;
     private LocationTimestampFragment locationTimestampFragment = null;
     private String cumulativeLog = "";
-    private Long tsPeriodic;
-    private Long tsInRegion, tsOutRegion = null;
-    private String closestLocation = null;
-    private String previousClosestLocation = null;
-    private String setLocation = null;
+    private Long tsPeriodic; //This value is used to measure out a periodic interval during which the closest beacon to the device is determined
+    private Long tsInRegion, tsOutRegion = null; //These values indicate the time spent in or out of a region respectively
+    private String closestLocation = null; //This is the the beacon or area that the device is closest to
+    private String previousClosestLocation = null; //This is the previous closest beacon or area which is appended to the user's log
+    private String setLocation = null; //This location is specifically set in the maps tab and use only when the user is using GPS to determine their location
     private double closestBeaconDist = 100;
     BeaconManager beaconManager;
     private Identifier myBeaconNamespaceId = Identifier.parse("0x00112233445566778898");
@@ -291,16 +292,18 @@ public class MainApplication extends Application implements BootstrapNotifier, B
                     if (setLocation == null) {
                         appendToList(previousClosestLocation, currentTime, timeSpent);
                         updateFragment();
-                        URI uri = DatabaseSync.getCredentials();
-                        if (uri != null)
-                            DatabaseSync.storeLogs(mlocationTimeStamps, uri, getDateOnly(currentTime));
+                        //URI uri = DatabaseSync.getCredentials();
+                        //if (uri != null)
+                            //DatabaseSync.storeLogs(mlocationTimeStamps, uri, getDateOnly(currentTime));
+                        storeLogs(currentTime);
                     }
                     else{
                         appendToList(setLocation, currentTime, timeSpent);
                         updateFragment();
-                        URI uri = DatabaseSync.getCredentials();
-                        if (uri != null)
-                            DatabaseSync.storeLogs(mlocationTimeStamps, uri, getDateOnly(currentTime));
+                        //URI uri = DatabaseSync.getCredentials();
+                        //if (uri != null)
+                        //    DatabaseSync.storeLogs(mlocationTimeStamps, uri, getDateOnly(currentTime));
+                        storeLogs(currentTime);
                     }
                     /*
                     String displayCurrentTime = getDateCurrentTimeZone(currentTime);
@@ -341,9 +344,10 @@ public class MainApplication extends Application implements BootstrapNotifier, B
                     closestLocation = "Outside";
                     appendToList(previousClosestLocation, currentTime, timeSpent);
                     updateFragment();
-                    URI uri = DatabaseSync.getCredentials();
-                    if (uri != null)
-                        DatabaseSync.storeLogs(mlocationTimeStamps, uri, getDateOnly(currentTime));
+                    //URI uri = DatabaseSync.getCredentials();
+                    //if (uri != null)
+                     //   DatabaseSync.storeLogs(mlocationTimeStamps, uri, getDateOnly(currentTime));
+                    storeLogs(currentTime);
                     updateCurrentLocationLTS(closestLocation, displayCurrentTime);
                     updateCurrentLocationMaps(closestLocation, displayCurrentTime);
                 }
@@ -595,9 +599,10 @@ public class MainApplication extends Application implements BootstrapNotifier, B
                                     Log.i(TAG, "Append should be called here");
                                     appendToList(previousClosestLocation, currentTime, timeSpent);
                                     updateFragment();
-                                    URI uri = DatabaseSync.getCredentials();
-                                    if (uri != null)
-                                        DatabaseSync.storeLogs(mlocationTimeStamps, uri, getDateOnly(currentTime));
+                                    //URI uri = DatabaseSync.getCredentials();
+                                    //if (uri != null)
+                                     //   DatabaseSync.storeLogs(mlocationTimeStamps, uri, getDateOnly(currentTime));
+                                    storeLogs(currentTime);
                                     updateCurrentLocationLTS(closestLocation, displayCurrentTime);
                                     updateCurrentLocationMaps(closestLocation, displayCurrentTime);
                                     tsInRegion = currentTime;
@@ -706,32 +711,83 @@ public class MainApplication extends Application implements BootstrapNotifier, B
         Log.i("Alarm", "Alarm Set");
     }
 
-    public void getCredentials(){
+    //Whenever a new work day has started the values used to track location and time must be reset
+    public void initNewday(){
+        tsPeriodic = System.currentTimeMillis();
+        tsInRegion = null;
+        tsOutRegion = null;
+        closestLocation = null;
+        previousClosestLocation = null;
+        setLocation = null;
+        closestBeaconDist = 100;
+        mlocationTimeStamps = DatabaseSync.getLogs(getDateOnly(System.currentTimeMillis()));
+    }
+    public void storeLogs(long currentTime) {
         SharedPreferences sp = getSharedPreferences("myProfile", 0);
         final String role = sp.getString("myRole", "Employee");
-        String username = sp.getString("profileName", "no_name_given");
+        String username = sp.getString("profileName", "no_name_given").toLowerCase();
         final String name = username.replace(' ', '-');
-        new  org.altbeacon.Network.DoWithProgress(this){
-            @Override
-            protected Void doInBackground(Void... params) {
-                try {
-                    ServerlessAPI.getCredentials(appIDAuthorizationManager.getAccessToken(), name, role);
-                } catch (Exception e) {
-                    e.printStackTrace();
+        Log.i("storelogs", "started");
+        //Ensure AppID has logged in a retrieved the name of the user
+        if (username != "no_name_given") {
+            new org.altbeacon.Network.DoWithoutProgress() {
+                @Override
+                protected URI doInBackground(URI... params) {
+                    try {
+                        Log.i("storelogs", "serverless api attempt");
+                        URI uri = ServerlessAPI.getCredentials(appIDAuthorizationManager.getAccessToken(), name, role);
+                        Log.i("storelogs", "URI is: " + uri.toString());
+                        return uri;
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    return null;
                 }
-                return null;
-            }
 
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                super.onPostExecute(aVoid);
-                Log.i("Post-Execute", "Finished");
-            }
-        }.execute();
+                @Override
+                protected void onPostExecute(URI uri) {
+                    super.onPostExecute(uri);
+                    if (uri != null) {
+                        Log.i("storelogs", "URI is: " + uri.toString());
+                        Log.i("storelogs", "push started");
+                        DatabaseSync.storeLogs(mlocationTimeStamps, uri, getDateOnly(currentTime));
+                    }
+                    Log.i("Post-Execute", "Finished");
+                }
+            }.execute();
 
+        }
     }
 
+    public void createDatabase() {
+        SharedPreferences sp = getSharedPreferences("myProfile", 0);
+        String username = sp.getString("profileName", "no_name_given").toLowerCase();
+        final String name = username.replace(' ', '-');
+        Log.i("createDatabase", "started");
+        //Ensure AppID has logged in a retrieved the name of the user
+        if (username != "no_name_given") {
+            new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected Void doInBackground(Void... params) {
+                    try {
+                        Log.i("createDatabase", "started");
+                        ServerlessAPI.createDatabase(appIDAuthorizationManager.getAccessToken(), name);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    return null;
+                }
 
+                @Override
+                protected void onPostExecute(Void aVoid) {
+                    super.onPostExecute(aVoid);
+                    Log.i("Post-Execute", "Finished creating database");
+                }
+            }.execute();
+
+        }
+    }
 }
 
 
