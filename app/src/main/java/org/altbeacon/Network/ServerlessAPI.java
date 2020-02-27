@@ -55,11 +55,14 @@ public class ServerlessAPI {
     Response response = client.newCall(request).execute();
     String uri = response.body().string();
     Log.i(ServerlessAPI.class.getName(), " Received Credentials: " + uri);
-    Pattern pattern = Pattern.compile(": \"(.*?)\"");
+    Pattern pattern = Pattern.compile("URL\": \"(.*?)\"");
     Matcher matcher = pattern.matcher(uri);
-    if (matcher.find())
+    if (matcher.find()) {
       uri = matcher.group(1);
-    Log.i("getCredentials", uri);
+      Log.i("getCredentials", uri);
+    }
+    else
+      uri = null;
     return new URI(uri);
   }
 

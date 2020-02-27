@@ -29,6 +29,7 @@ public class AlarmReceiver extends BroadcastReceiver {
             String displayCurrentTime = application.getDateCurrentTimeZone(currentTime);
             application.appendToList(lastLocation, currentTime, duration);
             application.updateFragment();
+            application.storeLogs(currentTime);
             application.setClosestLocationEnd();
             application.updateCurrentLocationLTS("END", displayCurrentTime);
             application.updateCurrentLocationMaps("END", displayCurrentTime);

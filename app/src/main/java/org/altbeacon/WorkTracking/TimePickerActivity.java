@@ -12,6 +12,9 @@ import android.widget.Button;
 import android.widget.TimePicker;
 
 import androidx.appcompat.widget.Toolbar;
+import androidx.preference.PreferenceManager;
+
+import org.threeten.bp.LocalTime;
 
 public class TimePickerActivity extends AppCompatActivity {
 
@@ -70,8 +73,21 @@ public class TimePickerActivity extends AppCompatActivity {
                 editor.putInt("eMinutes", minute2);
                 editor.commit();
                 Log.i("Alarm", "Main" + hour1 + " " + minute1 + " " + hour2 + " " + minute2);
+                setAlarm();
                 finish();
             }
         });
+    }
+    public void setAlarm(){
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        MainApplication application = (MainApplication) this.getApplicationContext();
+        if (preferences.getBoolean("alarmEnable", true)){
+            if (application.isBetweenWorkHours(LocalTime.now()))
+                application.setAlarm(false);
+            else
+                application.setAlarm(true);
+        }
+        else
+            application.cancelAlarm();
     }
 }

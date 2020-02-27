@@ -92,6 +92,14 @@ public class TokensPersistenceManager {
         return sharedPreferences.getString(APPID_REFRESH_TOKEN, null);
     }
 
+    public void removeRefreshToken(){
+        Log.i(TAG, "Removing Stored Refresh Token");
+        SharedPreferences sharedPreferences = ctx.getSharedPreferences(APPID_TOKENS_PREF, ctx.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.remove(APPID_REFRESH_TOKEN);
+        editor.commit();
+    }
+
     public String getStoredLoginAccessToken(){
         SharedPreferences sharedPreferences = ctx.getSharedPreferences(APPID_TOKENS_PREF, ctx.MODE_PRIVATE);
         if(sharedPreferences.getBoolean(APPID_IS_ANONYMOUS, true)){

@@ -34,7 +34,7 @@ public class SettingsFragment extends PreferenceFragmentCompat{
         eHours = sp.getInt("eHours", 18);
         eMinutes = sp.getInt("eMinutes", 0);
         setPreferenceTime(eHours, eMinutes, myPref2);
-        setAlarm();
+        //setAlarm();
 
         myPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
@@ -99,7 +99,7 @@ public class SettingsFragment extends PreferenceFragmentCompat{
         eMinutes = sp.getInt("eMinutes", 0);
         setPreferenceTime(eHours, eMinutes, myPref2);
         Log.i("Alarm", mHours + " " + mMinutes + " " + eHours + " " + eMinutes);
-        setAlarm();
+        //setAlarm();
     }
 
     public void setAlarm(){

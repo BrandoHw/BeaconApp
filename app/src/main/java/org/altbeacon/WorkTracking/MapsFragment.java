@@ -155,6 +155,7 @@ public class MapsFragment extends Fragment
             public void onClick(View v) {
                 fab.setVisibility(View.GONE);
                 fab2.setVisibility(View.GONE);
+                //Check if null
                 getActivity().getSupportFragmentManager().beginTransaction()
                         .add(R.id.maps_layout, new InternalMapFragment())
                         .addToBackStack("MapsFragment")

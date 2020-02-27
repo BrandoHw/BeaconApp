@@ -45,6 +45,7 @@ public class InternalMapFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 fab.setVisibility(View.GONE);
+                //Check if null
                 MapsFragment mapFrag = activity.returnMapsFragment();
                 mapFrag.setFabVisible();
                 getActivity().getSupportFragmentManager().popBackStackImmediate();

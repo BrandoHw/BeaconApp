@@ -190,15 +190,31 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
 								startActivity(new Intent(MonitoringActivity.this, ProfileActivity.class));
 								break;
 							case 3:
-								startActivity(new Intent(MonitoringActivity.this, BeaconSettingActivity.class));
+								//If user has permission to access the beacons setting
+								SharedPreferences sp = getSharedPreferences("myProfile", 0);
+								String role = sp.getString("myRole", "Employee");
+								if (role.equals("Manager"))
+									startActivity(new Intent(MonitoringActivity.this, BeaconSettingActivity.class));
+								else{
+									AlertDialog.Builder builder = new AlertDialog.Builder(MonitoringActivity.this);
+									builder.setMessage("You do not have permission to view this page")
+											.setCancelable(false)
+											.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+												public void onClick(DialogInterface dialog, int id) {
+													//do things
+												}
+											});
+									AlertDialog alert = builder.create();
+									alert.show();
+								}
 								break;
 							case 4:
 								startActivity(new Intent(MonitoringActivity.this, CalendarActivity.class));
 								break;
 							case 5:
-								FirebaseAuth.getInstance().signOut();
-								FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-								Log.i("Firebase", "Check if user is null: " + user);
+								AppID.getInstance().logout();
+								tokensPersistenceManager.removeRefreshToken();
+								//Log.i("Firebase", "Check if user is null: " + user);
 								startActivity(new Intent(MonitoringActivity.this, MainActivity.class));
 								break;
 							default:
@@ -347,7 +363,21 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
         MainApplication application = ((MainApplication) this.getApplicationContext());
         application.setMonitoringActivity(this);
 		headerResult.updateProfile(profile);
+
+		Log.i("Resume", "Resume started");
+		//Update the UI
+		application.updateFragment();
+		SharedPreferences sp = getSharedPreferences("temp", 0);
+		String closestLocation = sp.getString("closestLocation", null);
+		String timestamp = sp.getString("timestamp", null);
+
+		if (timestamp != null && closestLocation != null){
+			Log.i("Resume", "Values: " + closestLocation + timestamp);
+			application.updateCurrentLocationLTS(closestLocation, timestamp);
+			application.updateCurrentLocationMaps(closestLocation, timestamp);
+		}
         //updateLog(application.getLog());
+
     }
 
     @Override
@@ -459,59 +489,21 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
 	}
 
 
-	public void setAlarm() {
-			alarmMgr = (AlarmManager)this.getSystemService(Context.ALARM_SERVICE);
-			Intent intent = new Intent(this, AlarmReceiver.class);
-			alarmIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
-			Intent intent2 = new Intent(this, AlarmReceiver.class);
-			alarmIntent2 = PendingIntent.getBroadcast(this, 0, intent2, 0);
-
-			Calendar scheduleCalendar = Calendar.getInstance();
-			scheduleCalendar.setTimeInMillis(System.currentTimeMillis());
-			Calendar scheduleCalendar2 = Calendar.getInstance();
-			scheduleCalendar2.setTimeInMillis(System.currentTimeMillis());
-
-			SharedPreferences sharedPreferences = getSharedPreferences("myShift", 0);
-			if (sharedPreferences.contains("mHours")) {
-				mHours = sharedPreferences.getInt("mHours", 9);
-				//Log.i(TAG, "Set Time: " + Integer.toString(mHours));
-			}
-			if (sharedPreferences.contains("mMinutes")) {
-				mMinutes = sharedPreferences.getInt("mMinutes", 0);
-				//Log.i(TAG, "Set Time: " + Integer.toString(mMinutes));
-			}
-			if (sharedPreferences.contains("eHours")) {
-				eHours = sharedPreferences.getInt("eHours", 18);
-				//Log.i(TAG, "Set Time: " + Integer.toString(eHours));
-			}
-			if (sharedPreferences.contains("eMinutes")) {
-				eMinutes = sharedPreferences.getInt("eMinutes", 0);
-				//Log.i(TAG, "Set Time: "+ Integer.toString(eMinutes));
-			}
-
-			scheduleCalendar.set(Calendar.HOUR_OF_DAY, mMinutes);
-			scheduleCalendar.set(Calendar.MINUTE, mHours);
-			scheduleCalendar2.set(Calendar.HOUR_OF_DAY, eMinutes);
-			scheduleCalendar2.set(Calendar.MINUTE, eHours);
-
-			alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, scheduleCalendar.getTimeInMillis(),
-					AlarmManager.INTERVAL_DAY, alarmIntent);
-			alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, scheduleCalendar2.getTimeInMillis(),
-					AlarmManager.INTERVAL_DAY, alarmIntent2);
-			Log.i("Alarm", "Alarm Set");
-	}
 
 	public void saveRole(){
 		appID.getUserProfileManager().getAllAttributes(new UserProfileResponseListener() {
 			@Override
 			public void onSuccess(JSONObject response) {
 				Map map = new Gson().fromJson(response.toString(), Map.class);
-				String role = map.get("role").toString();
-				Log.i("Role: ", role);
-				SharedPreferences sp = getSharedPreferences("myProfile", 0);
-				SharedPreferences.Editor editor = sp.edit();
-				editor.putString("myRole", role);
-				editor.commit();
+
+				if (!map.isEmpty()) {
+					String role = map.get("role").toString();
+					Log.i("Role: ", role);
+					SharedPreferences sp = getSharedPreferences("myProfile", 0);
+					SharedPreferences.Editor editor = sp.edit();
+					editor.putString("myRole", role);
+					editor.commit();
+				}
 			}
 
 			@Override

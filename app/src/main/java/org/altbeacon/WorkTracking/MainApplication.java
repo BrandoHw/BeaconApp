@@ -271,6 +271,7 @@ public class MainApplication extends Application implements BootstrapNotifier, B
         logToDisplay("Current region state is: " + (state == 1 ? "INSIDE" : "OUTSIDE ("+state+")"));
         tsPeriodic = System.currentTimeMillis();
         Log.i(TAG, "The Region is" + region.toString());
+        Log.i("DidDetermine", "Triggered with state: " + state);
         BeaconManager beaconManager = BeaconManager.getInstanceForApplication(this);
         if (state == 1) {
             try {
@@ -283,6 +284,7 @@ public class MainApplication extends Application implements BootstrapNotifier, B
             if (isBetweenWorkHours((now))) {
                 //For outside of region to inside event
                 if (tsOutRegion != null && previousClosestLocation != null && closestLocation == "Outside" && previousClosestLocation != closestLocation) {
+                    Log.i("DidDetermine", "Outside to Inside");
                     tsInRegion = System.currentTimeMillis();
                     long timeSpent = tsInRegion - tsOutRegion;
                     long currentTime = tsInRegion;
@@ -290,19 +292,15 @@ public class MainApplication extends Application implements BootstrapNotifier, B
                     previousClosestLocation = closestLocation;
 
                     if (setLocation == null) {
+                        Log.i("DidDetermine", "Set Location");
                         appendToList(previousClosestLocation, currentTime, timeSpent);
                         updateFragment();
-                        //URI uri = DatabaseSync.getCredentials();
-                        //if (uri != null)
-                            //DatabaseSync.storeLogs(mlocationTimeStamps, uri, getDateOnly(currentTime));
                         storeLogs(currentTime);
                     }
                     else{
+                        Log.i("DidDetermine", "Other");
                         appendToList(setLocation, currentTime, timeSpent);
                         updateFragment();
-                        //URI uri = DatabaseSync.getCredentials();
-                        //if (uri != null)
-                        //    DatabaseSync.storeLogs(mlocationTimeStamps, uri, getDateOnly(currentTime));
                         storeLogs(currentTime);
                     }
                     /*
@@ -326,6 +324,7 @@ public class MainApplication extends Application implements BootstrapNotifier, B
             if (isBetweenWorkHours((now))) {
                 if (previousClosestLocation == null) {
                     //For starting in outside location
+                    Log.i("DidDetermine", "PCL = Null");
                     tsOutRegion = System.currentTimeMillis();
                     String displayCurrentTime = getDateCurrentTimeZone(tsOutRegion);
                     closestLocation = "Outside";
@@ -333,6 +332,7 @@ public class MainApplication extends Application implements BootstrapNotifier, B
                     updateCurrentLocationMaps(closestLocation, displayCurrentTime);
                     //For moving from inside to outside
                 }else if (tsInRegion != null && previousClosestLocation != null && closestLocation != "Outside") {
+                    Log.i("DidDetermine", "Inside to Outside");
                     tsOutRegion = System.currentTimeMillis();
                     long timeSpent = tsOutRegion - tsInRegion;
                     long currentTime = tsOutRegion;
@@ -344,9 +344,6 @@ public class MainApplication extends Application implements BootstrapNotifier, B
                     closestLocation = "Outside";
                     appendToList(previousClosestLocation, currentTime, timeSpent);
                     updateFragment();
-                    //URI uri = DatabaseSync.getCredentials();
-                    //if (uri != null)
-                     //   DatabaseSync.storeLogs(mlocationTimeStamps, uri, getDateOnly(currentTime));
                     storeLogs(currentTime);
                     updateCurrentLocationLTS(closestLocation, displayCurrentTime);
                     updateCurrentLocationMaps(closestLocation, displayCurrentTime);
@@ -418,6 +415,7 @@ public class MainApplication extends Application implements BootstrapNotifier, B
         Log.i(TAG, sb.toString());
         return(sb.toString());
     }
+
     public  String getDateCurrentTimeZone(long timestamp) {
         try{
             Calendar calendar = Calendar.getInstance();
@@ -447,7 +445,6 @@ public class MainApplication extends Application implements BootstrapNotifier, B
         }
         return "";
     }
-
 
     public boolean isBetweenWorkHours(LocalTime now){
         int mHours = 9, mMinutes = 0, eHours = 18, eMinutes = 0;
@@ -492,18 +489,18 @@ public class MainApplication extends Application implements BootstrapNotifier, B
     }
 
     public void appendToList(String location, long timestamp,  long milis){
-        Log.d(TAG, "appendToList called");
+        Log.i(TAG, "appendToList called");
         LocationTimeStamp lts = new LocationTimeStamp(location, getDateCurrentTimeZone(timestamp), getDurationBreakdown(milis));
         mlocationTimeStamps.add(0, lts);
     }
 
     public void updateFragment() {
-        Log.d(TAG, "updateFragment called");
+        Log.i(TAG, "updateFragment called");
         if (monitoringActivity != null) {
             if (monitoringActivity.isFragmentVisible("LTS_FRAG")) {
                 LocationTimestampFragment myFragment = monitoringActivity.returnLtsFragment();
                 myFragment.updateAdapter();
-                Log.d(TAG, "updateFragment success");
+                Log.i(TAG, "updateFragment success");
             }
         }
     }
@@ -519,9 +516,14 @@ public class MainApplication extends Application implements BootstrapNotifier, B
                 myFragment.updateCurrentLocation(currentLocation, timestamp);
                 Log.d(TAG, "updateCurrentLocationLTS success");
             }
+        }else{//If monitoring activity is not visible it cannot be updated, store the data temporarily to sp and update in onResume();
+            SharedPreferences sp = getSharedPreferences("temp", 0);
+            SharedPreferences.Editor editor = sp.edit();
+            editor.putString("currentLocation", currentLocation);
+            editor.putString("timestamp", timestamp);
+            editor.commit();
         }
     }
-
 
     public void updateCurrentLocationMaps(String currentLocation, String timestamp){
         Log.d(TAG, "updateCurrentLocationMaps called");
@@ -562,7 +564,7 @@ public class MainApplication extends Application implements BootstrapNotifier, B
 
                         //Determine which beacon in range is the closest
                         for (Beacon beacon : beacons) {
-                            putListOfBeacons(beacon);
+                            putListOfBeacons(beacon); //Put beacon into the list of beacons in range, used when editing beacon info in the beacons setting activity
                             Log.i(TAG, "Beacon instance is: "+beacon.getId2().toString());
                             //Check if the beacon instance has been saved as a location in shared preferences
                             if (sharedPreferences.contains(beacon.getId2().toString())) {
@@ -587,10 +589,11 @@ public class MainApplication extends Application implements BootstrapNotifier, B
                             closestBeaconDist = 100;
                             tsPeriodic = System.currentTimeMillis();
                             Log.i(TAG, "The closest beacon is: " + closestLocation + " The previous cl is " + previousClosestLocation);
-                            if (closestLocation != null && (closestLocation != previousClosestLocation)) {
+                            if (closestLocation != null && !(closestLocation.equals(previousClosestLocation))) {
                                 //If this is not the first time a beacon is detected and the previous location was not outside the region
                                 // i.e The location has changed from one beacon to another
                                 if (previousClosestLocation != null && previousClosestLocation != "Outside") {
+                                    Log.i("didRange", "PCL != Null, pcl != outside");
                                     long currentTime = System.currentTimeMillis();
                                     long timeSpent = currentTime - tsInRegion;
                                     //convert current time to date
@@ -609,6 +612,7 @@ public class MainApplication extends Application implements BootstrapNotifier, B
                                     previousClosestLocation = closestLocation;
                                 }
                                 else if(previousClosestLocation == "Outside"){
+                                    Log.i("didRange", "pcl = outside");
                                     long currentTime = tsInRegion;
                                     String displayCurrentTime = getDateCurrentTimeZone(currentTime);
                                     Log.i("Current Time", displayCurrentTime);
@@ -619,7 +623,8 @@ public class MainApplication extends Application implements BootstrapNotifier, B
                                 }
                                 // This logic is used the first time a beacon is detected
                                 // i.e The location starts within range of a beacon
-                                else {
+                                else if(previousClosestLocation == null) {
+                                    Log.i("didRange", "Other");
                                     tsInRegion = System.currentTimeMillis();
                                     long currentTime = tsInRegion;
                                     String displayCurrentTime = getDateCurrentTimeZone(currentTime);
@@ -713,6 +718,7 @@ public class MainApplication extends Application implements BootstrapNotifier, B
 
     //Whenever a new work day has started the values used to track location and time must be reset
     public void initNewday(){
+        Log.i(TAG, "Initialize started");
         tsPeriodic = System.currentTimeMillis();
         tsInRegion = null;
         tsOutRegion = null;
@@ -727,16 +733,16 @@ public class MainApplication extends Application implements BootstrapNotifier, B
         final String role = sp.getString("myRole", "Employee");
         String username = sp.getString("profileName", "no_name_given").toLowerCase();
         final String name = username.replace(' ', '-');
-        Log.i("storelogs", "started");
+        Log.i(TAG, "Storelogs started");
         //Ensure AppID has logged in a retrieved the name of the user
         if (username != "no_name_given") {
             new org.altbeacon.Network.DoWithoutProgress() {
                 @Override
                 protected URI doInBackground(URI... params) {
                     try {
-                        Log.i("storelogs", "serverless api attempt");
+                        Log.i(TAG, "Storelogs: serverless api attempt");
                         URI uri = ServerlessAPI.getCredentials(appIDAuthorizationManager.getAccessToken(), name, role);
-                        Log.i("storelogs", "URI is: " + uri.toString());
+                        Log.i(TAG, "Storelogs: URI is: " + uri.toString());
                         return uri;
 
                     } catch (Exception e) {
@@ -749,11 +755,11 @@ public class MainApplication extends Application implements BootstrapNotifier, B
                 protected void onPostExecute(URI uri) {
                     super.onPostExecute(uri);
                     if (uri != null) {
-                        Log.i("storelogs", "URI is: " + uri.toString());
-                        Log.i("storelogs", "push started");
+                        Log.i(TAG, "Storelogs: URI is: " + uri.toString());
+                        Log.i(TAG, "Storelogs: push started");
                         DatabaseSync.storeLogs(mlocationTimeStamps, uri, getDateOnly(currentTime));
                     }
-                    Log.i("Post-Execute", "Finished");
+                    Log.i(TAG, "Storelogs: Post Execute Finished");
                 }
             }.execute();
 

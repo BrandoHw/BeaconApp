@@ -6,6 +6,10 @@ import android.os.Bundle;
 
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.ibm.cloud.appid.android.api.AppID;
+import com.ibm.cloud.appid.android.api.AppIDAuthorizationManager;
+import com.ibm.cloud.appid.android.api.userprofile.UserProfileException;
+import com.ibm.cloud.appid.android.api.userprofile.UserProfileResponseListener;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,11 +24,18 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONObject;
+
 public class ProfileActivity extends AppCompatActivity implements View.OnClickListener {
 
     static final int TEXT_INPUT = 0;
     static final int PHONE_INPUT = 1;
+    final String TAG = "ProfileActivity";
+    //AppId Profile
+    private AppID appID;
+    private AppIDAuthorizationManager appIDAuthorizationManager;
 
+    //Views
     ImageView profileNameIcon, profileEmailIcon, profilePhoneIcon, profileJobIcon;
     TextView profileName, profileEmail, profilePhone, profileJob;
     SharedPreferences sp;
@@ -63,6 +74,10 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         profileEmail.setText(sp.getString("profileEmail", "Enter Your Email"));
         profilePhone.setText(sp.getString("profilePhone", "Enter Your Phone"));
         profileJob.setText(sp.getString("profileJob", "Enter Your Job Title"));
+
+        //AppId Init
+        appID = AppID.getInstance();
+        appIDAuthorizationManager = new AppIDAuthorizationManager(appID);
     }
 
 
@@ -100,15 +115,42 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
                         // edit text
                         switch (detailType){
                             case 1:
-                                editor.putString("profileName", userInput.getText().toString());
-                                editor.commit();
-                                profileName.setText(userInput.getText().toString());
+                                appID.getUserProfileManager().setAttribute("displayName", userInput.getText().toString(), new UserProfileResponseListener() {
+                                    @Override
+                                    public void onSuccess(JSONObject attributes) {
+                                        // Set attribute "name" to "value" successfully
+                                        Log.i(TAG, "Set Name Successful");
+                                        editor.putString("profileName", userInput.getText().toString());
+                                        editor.commit();
+                                    }
+
+                                    @Override
+                                    public void onFailure(UserProfileException e) {
+                                        // Exception occurred
+                                        //Failure Dialog
+                                    }
+                                });
+                                String name = sp.getString("profileName", "No name given");
+                                profileName.setText(name);
                                 break;
 
                             case 2:
-                                editor.putString("profileEmail", userInput.getText().toString());
-                                editor.commit();
-                                profileEmail.setText(userInput.getText().toString());
+                                appID.getUserProfileManager().setAttribute("email", userInput.getText().toString(), new UserProfileResponseListener() {
+                                    @Override
+                                    public void onSuccess(JSONObject attributes) {
+                                        // Set attribute "name" to "value" successfully
+                                        editor.putString("profileEmail", userInput.getText().toString());
+                                        editor.commit();
+                                    }
+
+                                    @Override
+                                    public void onFailure(UserProfileException e) {
+                                        // Exception occurred
+                                        //Failure Dialog
+                                    }
+                                });
+                                String email = sp.getString("profileEmail", "No name given");
+                                profileEmail.setText(email);
                                 break;
 
                             case 3:
