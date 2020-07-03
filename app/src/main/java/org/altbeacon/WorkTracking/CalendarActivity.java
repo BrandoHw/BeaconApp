@@ -98,7 +98,7 @@ public class CalendarActivity extends AppCompatActivity {
         SharedPreferences sp = getSharedPreferences("myEvents", 0);
         Gson gson = new Gson();
         String json =  sp.getString( "eventList", null);
-        Log.i("GSON", json);
+        //Log.i("GSON", json);
         Type type = new TypeToken<ArrayList<MyEventDay>>() {}.getType();
         mEventDays = gson.fromJson(json, type);
 

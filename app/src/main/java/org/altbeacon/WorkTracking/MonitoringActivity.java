@@ -77,7 +77,7 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
 
 	//Shared Preferences
 	public static final String myPreference = "myBeacons";
-	Identifier myBeaconNamespaceId = Identifier.parse("0x00112233445566778898");
+	Identifier myBeaconNamespaceId = Identifier.parse("0xd88a52b9f700da5e35f1");
 
 	//Alarm Manager
 	private int mHours = 9, mMinutes = 0, eHours = 18, eMinutes = 0;
@@ -366,15 +366,15 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
 
 		Log.i("Resume", "Resume started");
 		//Update the UI
-		application.updateFragment();
+		//application.updateFragment();
 		SharedPreferences sp = getSharedPreferences("temp", 0);
 		String closestLocation = sp.getString("closestLocation", null);
 		String timestamp = sp.getString("timestamp", null);
 
 		if (timestamp != null && closestLocation != null){
 			Log.i("Resume", "Values: " + closestLocation + timestamp);
-			application.updateCurrentLocationLTS(closestLocation, timestamp);
-			application.updateCurrentLocationMaps(closestLocation, timestamp);
+			//application.updateCurrentLocationLTS(closestLocation, timestamp);
+			//application.updateCurrentLocationMaps(closestLocation, timestamp);
 		}
         //updateLog(application.getLog());
 
@@ -495,14 +495,17 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
 			@Override
 			public void onSuccess(JSONObject response) {
 				Map map = new Gson().fromJson(response.toString(), Map.class);
-
+				Log.i("Role", map.toString());
 				if (!map.isEmpty()) {
-					String role = map.get("role").toString();
-					Log.i("Role: ", role);
-					SharedPreferences sp = getSharedPreferences("myProfile", 0);
-					SharedPreferences.Editor editor = sp.edit();
-					editor.putString("myRole", role);
-					editor.commit();
+					Object object = map.get("role");
+					if (object != null) {
+						String role = object.toString();
+						Log.i("Role: ", role);
+						SharedPreferences sp = getSharedPreferences("myProfile", 0);
+						SharedPreferences.Editor editor = sp.edit();
+						editor.putString("myRole", role);
+						editor.commit();
+					}
 				}
 			}
 

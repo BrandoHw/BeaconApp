@@ -62,11 +62,11 @@ public class LocationRecyclerViewAdapter extends RecyclerView.Adapter<LocationRe
     }
 
     public void update(ArrayList<LocationTimeStamp> lts){
-        mlocationTimeStamps.clear();
-        mlocationTimeStamps.addAll(lts);
-        //mlocationTimeStamps = lts;
+        //mlocationTimeStamps.clear();
+        //mlocationTimeStamps.addAll(lts);
+        mlocationTimeStamps = lts;
         Log.i("Adapter", "Attempting Notify Item Inserted");
-        //notifyItemInserted(0);
-        notifyDataSetChanged();
+        notifyItemInserted(0);
+        //notifyDataSetChanged();
     }
 }

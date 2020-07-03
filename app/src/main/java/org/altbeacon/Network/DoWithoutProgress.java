@@ -10,7 +10,7 @@ import java.net.URI;
 
 public abstract class DoWithoutProgress extends AsyncTask<URI, URI, URI> {
 
-    private static final String TAG = "DoWithProgress";
+    private static final String TAG = "DoWithoutProgress";
 
 
     @Override

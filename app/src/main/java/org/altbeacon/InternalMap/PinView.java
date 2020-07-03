@@ -279,7 +279,7 @@ public class PinView extends SubsamplingScaleImageView implements onPinClickList
 
     void listDialog(PointF tappedCoordinate){
         MaterialAlertDialogBuilder listDialogBuilder = new MaterialAlertDialogBuilder(getContext(), R.style.myDialog);
-        listDialogBuilder.setTitle("Select A Beacon: ");
+        listDialogBuilder.setTitle("Select a Beacon: ");
 
         final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getContext(), android.R.layout.select_dialog_singlechoice);
         final ArrayList<String> beaconUID = new ArrayList<>();

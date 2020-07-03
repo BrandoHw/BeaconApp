@@ -76,6 +76,21 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
+
+
+        <service
+            android:name="org.altbeacon.beaconreference.BackgroundRanging"
+            android:enabled="true"
+            android:exported="true">
+        </service>
+
+        <service
+            android:name="org.altbeacon.service.ForegroundService"
+            android:enabled="true"
+            android:exported="true">
+        </service>
+
     </application>
+
 
 </manifest>

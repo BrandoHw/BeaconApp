@@ -134,6 +134,9 @@ public class LoginFragment extends Fragment implements
         String inputEmail = usernameEditText.getText().toString();
         String inputPassword = passwordEditText.getText().toString();
 
+        inputEmail = inputEmail.trim();
+        inputPassword = inputPassword.trim();
+
         AppIdAuthorizationListener appIdAuthorizationListener =
                 new AppIdAuthorizationListener(getActivity(), appIdAuthorizationManager, false, progressManager);
 
@@ -141,6 +144,7 @@ public class LoginFragment extends Fragment implements
             appIdAuthorizationListener.onAuthorizationFailure(new AuthorizationException("Something didn't work out.\nPlease try entering your email and password again."));
         } else {
             Log.d(TAG, "Signing In with ROP");
+
             appId.signinWithResourceOwnerPassword(getActivity().getApplicationContext(), inputEmail, inputPassword, appIdAuthorizationListener);
         }
     }
