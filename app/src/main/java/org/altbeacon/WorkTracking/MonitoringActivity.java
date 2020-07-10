@@ -7,12 +7,15 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.provider.Settings;
 import android.text.InputFilter;
 import android.util.Log;
 import android.view.View;
@@ -61,28 +64,18 @@ import androidx.appcompat.widget.Toolbar;
 
 /**
  */
-public class MonitoringActivity extends AppCompatActivity implements BeaconConsumer{
+public class MonitoringActivity extends AppCompatActivity {
 	protected static final String TAG = "MonitoringActivity";
 	private static final int PERMISSION_REQUEST_FINE_LOCATION = 1;
 	private static final int PERMISSION_REQUEST_BACKGROUND_LOCATION = 2;
 
-	BeaconManager beaconManager = org.altbeacon.beacon.BeaconManager.getInstanceForApplication(this);
-	TextView namespaceID;
-	TextView instanceID;
-	TextView locationID;
-	TextView timeID1, timeID2;
+	//BeaconManager beaconManager = org.altbeacon.beacon.BeaconManager.getInstanceForApplication(this);
+
 	SharedPreferences sharedpreferences;
-	InputFilter timeFilter;
-	private boolean doneOnce = false;
 
 	//Shared Preferences
 	public static final String myPreference = "myBeacons";
 	Identifier myBeaconNamespaceId = Identifier.parse("0xd88a52b9f700da5e35f1");
-
-	//Alarm Manager
-	private int mHours = 9, mMinutes = 0, eHours = 18, eMinutes = 0;
-	private AlarmManager alarmMgr;
-	private PendingIntent alarmIntent, alarmIntent2;
 
 	//Layout
 	private Toolbar toolbar;
@@ -215,7 +208,9 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
 								AppID.getInstance().logout();
 								tokensPersistenceManager.removeRefreshToken();
 								//Log.i("Firebase", "Check if user is null: " + user);
-								startActivity(new Intent(MonitoringActivity.this, MainActivity.class));
+                                Intent intent = new Intent(MonitoringActivity.this, MainActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startActivity(intent);
 								break;
 							default:
 								return true;
@@ -237,8 +232,8 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
 
 
 		//Bind The beaconmanager,
-		beaconManager.bind(this);
-		beaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout(BeaconParser.EDDYSTONE_UID_LAYOUT));
+		//beaconManager.bind(this);
+		//beaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout(BeaconParser.EDDYSTONE_UID_LAYOUT));
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 			if (this.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
@@ -309,7 +304,7 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		beaconManager.unbind(this);
+		//beaconManager.unbind(this);
 	}
 
 	@Override
@@ -424,30 +419,20 @@ public class MonitoringActivity extends AppCompatActivity implements BeaconConsu
 
 	}
 
-//    public void updateLog(final String log) {
-//    	runOnUiThread(new Runnable() {
-//    	    public void run() {
-//    	    	EditText editText = (EditText)MonitoringActivity.this
-//    					.findViewById(R.id.monitoringText);
-//       	    	editText.setText(log);
-//    	    }
-//    	});
-//    }
-
-	@Override
-	public void onBeaconServiceConnect() {
-
-		try {
-			SharedPreferences sharedPreferences = getSharedPreferences("myBeacons", 0);
-			if (sharedPreferences.contains("namespace")) {
-				myBeaconNamespaceId = Identifier.parse(sharedPreferences.getString("namespace", null));
-			}
-			Region region = new Region("backgroundRegion",
-					myBeaconNamespaceId, null, null);
-
-			beaconManager.startMonitoringBeaconsInRegion(region);
-		} catch (RemoteException e) {    }
-	}
+//	@Override
+//	public void onBeaconServiceConnect() {
+//
+//		try {
+//			SharedPreferences sharedPreferences = getSharedPreferences("myBeacons", 0);
+//			if (sharedPreferences.contains("namespace")) {
+//				myBeaconNamespaceId = Identifier.parse(sharedPreferences.getString("namespace", null));
+//			}
+//			Region region = new Region("backgroundRegion",
+//					myBeaconNamespaceId, null, null);
+//
+//			beaconManager.startMonitoringBeaconsInRegion(region);
+//		} catch (RemoteException e) {    }
+//	}
 
 	public boolean isFragmentVisible(String fragName){
 		Log.d(TAG, "isFragmentVisible called");
