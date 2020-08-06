@@ -83,7 +83,9 @@ public class MonitoringActivity extends AppCompatActivity {
 	private ViewPager viewPager;
 	private int[] tabIcons = {
 			R.drawable.logicon,
-			R.drawable.ic_map_black_24dp,
+			R.drawable.ic_bluetooth_black_24dp,
+			//R.drawable.ic_map_black_24dp,
+			R.drawable.ic_baseline_history_24,
 			R.drawable.ic_settings_black_24dp
 	};
 	ProfileDrawerItem profile;
@@ -372,7 +374,7 @@ public class MonitoringActivity extends AppCompatActivity {
 			//application.updateCurrentLocationMaps(closestLocation, timestamp);
 		}
         //updateLog(application.getLog());
-
+		application.updateFragment();
     }
 
     @Override
@@ -465,6 +467,7 @@ public class MonitoringActivity extends AppCompatActivity {
 		tabLayout.getTabAt(0).setIcon(tabIcons[0]);
 		tabLayout.getTabAt(1).setIcon(tabIcons[1]);
 		tabLayout.getTabAt(2).setIcon(tabIcons[2]);
+		tabLayout.getTabAt(3).setIcon(tabIcons[3]);
 	}
 
 	@Override

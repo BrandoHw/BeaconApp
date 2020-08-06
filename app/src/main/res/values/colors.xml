@@ -13,4 +13,8 @@
     <color name="tabIndicatorColor">#E8AD37</color>
     <color name="ltsCardColor">#3A506B</color>
     <color name="card_text_color">#000000</color>
+    <color name="progress_bar_scanning">#2196F3</color>
+    <color name="progress_bar_check_out">#F4BC1C</color>
+    <color name="cancel_circle_color">#A61B1F</color>
+
 </resources>

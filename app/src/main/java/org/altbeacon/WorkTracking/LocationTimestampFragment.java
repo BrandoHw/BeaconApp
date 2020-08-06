@@ -86,5 +86,11 @@ public class LocationTimestampFragment extends Fragment {
         currentLocationId.setText("Current Location: " + currentLocation);
         currentTimestampId.setText("[" + timeStamp + "]");
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateAdapter();
+    }
 }
 

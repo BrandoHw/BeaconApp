@@ -18,10 +18,11 @@ public class AlarmReceiver extends BroadcastReceiver {
         if (application.isBetweenWorkHours(now)) {
             Log.i(TAG, "Monitoring Enabled");
             //Initialize the application for new work day
-            application.initNewday();
+            application.initNewDay();
             application.enableMonitoring();
         } else {
             application.disableMonitoring();
+            application.stopGPS();
             long latestTime = application.latestTimeStamp();
             long currentTime = System.currentTimeMillis();
             long duration = currentTime - latestTime;

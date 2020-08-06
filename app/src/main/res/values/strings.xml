@@ -72,6 +72,13 @@
     <string name="profile_phonenumber">Phone number</string>
     <string name="profile_jobtitle">Job Title</string>
 
+    //Bluetooth Fragment
+    <string name="bt_boldtext">Searching</string>
+    <string name="bt_location">Location</string>
+    <string name="bt_status">Status</string>
+    <string name="bt_button">Check-In</string>
+
+
     //AppId Strings
     <string name="hintText"><b>Hint:</b> Replace this screen with content that is available before a user is asked to login</string>
     <string name="mainAppID">App <b>ID</b></string>
@@ -111,5 +118,20 @@ The app accesses his identified profile and the previous selections that he made
     <string name="facebook_app_id">YOUR_APP_ID_HERE</string>
 
 
+    //Bluetooth Fragment
+    <string name="location">Location: %1$s</string>
+    <string name="location_rssi">Location: %1$s RSSI: %2$.0f dBm</string>
+    <string name="scanning">Scanning</string>
+    <string name="check_in">CHECK-IN</string>
+    <string name="check_out">CHECK-OUT</string>
+    <string name="check_out_title">Ready to Check-Out</string>
 
+    //Verification Dialog
+    <string name="veri_dialog_check_in">Successful Check-In</string>
+    <string name="veri_dialog_check_in_subtext">Remember to check-out when finished</string>
+    <string name="veri_dialog_check_out">Successful Check-out</string>
+    <string name="veri_dialog_check_out_subtext">You have successfully checked-out</string>
+    <string name="veri_dialog_failed">Failed</string>
+    <string name="veri_dialog_failed_subtext">Fingerprint verification failed, please try again</string>
+    <string name="ok">OK</string>
 </resources>

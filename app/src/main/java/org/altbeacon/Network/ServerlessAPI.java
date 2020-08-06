@@ -38,7 +38,7 @@ public class ServerlessAPI {
 
 
   /**
-   * Retrieves credentials from the web service which are use to synchronize local database with cloud database
+   * Retrieves credentials from the web service which are used to synchronize local database with cloud database
    * Credentials are also used to view database if user has "MANAGER" permissions
    */
   public static URI getCredentials(AccessToken accessToken, String db_name, String role) throws Exception {

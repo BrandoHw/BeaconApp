@@ -55,4 +55,16 @@
 
     <style name="WorkTrack.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <style name="FPDialog" parent="android:style/Theme.Dialog">
+        <item name="android:windowBackground">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">true</item>
+    </style>
+
+    <style name="BlueButton" parent="Widget.MaterialComponents.Button">
+        <item name="colorButtonNormal">@drawable/button_toggle</item>
+        <item name="android:textColor">@color/md_white_1000</item>
+    </style>
+
+
 </resources>
