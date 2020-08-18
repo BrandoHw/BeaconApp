@@ -5,6 +5,8 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import org.altbeacon.utils.DateStringUtils;
+
 @Entity(tableName = "attendance_records")
 public class AttendanceRecord {
 
@@ -53,8 +55,8 @@ public class AttendanceRecord {
     }
 
     private int getHoursWorked(String check_in, String check_out){
-        long milis = 10;
-        return 10;
+        long hours_worked = DateStringUtils.getDatetimeLong(check_out) - DateStringUtils.getDatetimeLong(check_in);
+        return (int) (hours_worked/1000);
     }
 
     public int getId() {

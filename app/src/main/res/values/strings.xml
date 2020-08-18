@@ -134,4 +134,12 @@ The app accesses his identified profile and the previous selections that he made
     <string name="veri_dialog_failed">Failed</string>
     <string name="veri_dialog_failed_subtext">Fingerprint verification failed, please try again</string>
     <string name="ok">OK</string>
+
+    //Attendance Card
+    <string name="att_card_email">Email: </string>
+    <string name="att_card_check_in">Check-In Time: </string>
+    <string name="att_card_check_out">Check-Out Time: </string>
+    <string name="att_card_location">Location: </string>
+    <string name="att_card_hours">Duration: </string>
+
 </resources>

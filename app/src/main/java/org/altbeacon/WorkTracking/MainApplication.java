@@ -37,6 +37,7 @@ import org.altbeacon.beacon.powersave.BackgroundPowerSaver;
 import org.altbeacon.beacon.startup.RegionBootstrap;
 import org.altbeacon.beacon.startup.BootstrapNotifier;
 import org.altbeacon.bluetooth.BluetoothMedic;
+import org.altbeacon.database.UserRepository;
 import org.altbeacon.location.GpsRequests;
 import org.altbeacon.login.TokensPersistenceManager;
 import org.altbeacon.objects.LocationTimeStamp;
@@ -89,6 +90,9 @@ public class MainApplication extends Application implements BootstrapNotifier, B
 
     //Location Updates
     private static GpsRequests gps = new GpsRequests();
+
+    //User Data Repository
+    private UserRepository userRepository = new UserRepository(this);
 
     @Override
     public void onCreate() {
@@ -195,7 +199,7 @@ public class MainApplication extends Application implements BootstrapNotifier, B
 
         //Initialize AppID
         appID = AppID.getInstance();
-        appID.initialize(this, getString(R.string.authTenantId), AppID.REGION_US_SOUTH);
+        appID.initialize(this, getString(R.string.authTenantId), AppID.REGION_SYDNEY);
         appIDAuthorizationManager = new AppIDAuthorizationManager(appID);
         tokensPersistenceManager = new TokensPersistenceManager(this, appIDAuthorizationManager);
 

@@ -38,7 +38,6 @@ public class AttendanceRepository {
         mAttendanceDao = db.AttendanceDao();
         mAllAttendanceToday = mAttendanceDao.getRecordsToday(DateStringUtils.getDateOnly(System.currentTimeMillis()));
         mAllAttendance = mAttendanceDao.getAllRecords();
-
     }
 
     // Room executes all queries on a separate thread.

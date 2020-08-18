@@ -30,8 +30,8 @@ public class GpsRequests {
     private LocationSettingsRequest locationSettingsRequest;
 
 
-    private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 30000;
-    private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = 30000;
+    private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 300000;
+    private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = 300000;
 
     public GpsRequests() {
 
